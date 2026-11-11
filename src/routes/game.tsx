@@ -184,7 +184,7 @@ function GamePage() {
     const key = isNight ? `N${state.night}` : `${state.phase}${state.day}`;
     if (lastPhase.current && lastPhase.current !== key) {
       if (isNight) setTransition("NIGHT");
-      else if (state.phase === "AUBE") setTransition("DAY");
+      else if (state.phase === "AUBE" && lastPhase.current.startsWith("N")) setTransition("DAY");
     }
     lastPhase.current = key;
   }, [state]);
