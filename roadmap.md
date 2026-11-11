@@ -10,7 +10,7 @@
 - [x] Codemagic: skip re-adding Android platform when present; guard audio storage.
 
 ## Dawn flow & night overview
-- [ ] Keep the night report before captain succession, revenge, and debate setup.
-- [ ] Present succession as a guided modal and retain chained death continuation.
-- [ ] Show every living night player with eligibility reasons and status chips.
-- [ ] Run rule tests and verify the guided flow on desktop and mobile.
+- [x] Keep the night report before captain succession, revenge, and debate setup.
+- [x] Present succession as a guided modal and retain chained death continuation.
+- [x] Show every living night player with eligibility reasons and status chips.
+- [x] Run rule tests and verify the guided flow on desktop and mobile.
