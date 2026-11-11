@@ -1,0 +1,632 @@
+import { NEW_ROLE_LOCALES } from "./new-roles";
+/** French dictionary — source of truth original. */
+export const fr = {
+  ui: {
+    ...NEW_ROLE_LOCALES.fr.ui,
+    seatingTitle: "Disposition du cercle",
+    seatingHint:
+      "Glissez un joueur sur un autre pour échanger leurs places. L'ordre du cercle détermine les voisins.",
+    seatingTable: "La Table",
+    seatingCount: "{n} joueurs",
+    seatingNodeLabel: "Siège {n} — {name}",
+    seatingConfirm: "Valider le cercle & Lancer la nuit",
+    soloPackSuffix: " — Meute solo",
+    stepWakeAlt: "Réveil du rôle {role}",
+    narratorAlt: "Le Conteur, conteur masqué avec le grimoire lumineux",
+    // Common
+    back: "← Retour",
+    next: "Suivant",
+    continue: "Continuer",
+    loading: "Chargement…",
+    quit: "Quitter",
+    yes: "Oui",
+    no: "Non",
+    validate: "Valider",
+    skip: "Passer",
+    random: "🎲 Tirage au sort",
+    language: "Langue",
+    sound: "Son",
+    soundOn: "Coupé",
+    soundOff: "Actif",
+    offline: "100% Hors-ligne",
+
+    // Home
+    tagline: "Le village s'endort…",
+    newGame: "Nouvelle Partie",
+    grimoire: "Grimoire des rôles",
+    footer: "Nightfall Oracle",
+    logoAlt: "Loup hurlant devant une lune rose",
+
+    // Grimoire
+    grimoireTitle: "Grimoire des rôles",
+    grimoireHint:
+      "Touchez l'icône d'information sur une carte pour afficher sa description et son pouvoir.",
+    narratorTitle: "Le Conteur (Meneur de jeu)",
+    narratorIntro:
+      "Je suis le Maître du Jeu. J'éveille les âmes, décompte les voix et annonce les morts. Suivez mes instructions : une nuit seulement sépare le village des crocs.",
+    infoRole: "Voir la description",
+    powerLabel: "Pouvoir : ",
+
+    // Setup
+    setupTitle: "Noms des joueurs",
+    playerNamePlaceholder: "Nom du joueur",
+    addPlayer: "+ Ajouter un joueur",
+    remove: "Supprimer",
+    defaultPlayer: "Joueur",
+    debateTimer: "Chrono de débat",
+    debateTimerDesc: "Chaque joueur dispose d'un temps de parole délimité.",
+    debateTimerToggle: "Activer le chrono de débat",
+    custom: "Personnalisé",
+    perPlayerDebate: "{n} secondes par joueur pendant la phase de débat.",
+
+    // Game Master
+    gmTitle: "Meneur de Jeu",
+    gmSubtitle:
+      "Désignez le Meneur : il tiendra le téléphone et guidera le jeu. Il n'aura pas de carte de rôle.",
+    gmRandom: "🎲 Tirer au sort",
+    gmNext: "Continuer",
+    gmChosen: "Meneur de Jeu",
+    gmExcluded: "Le Meneur ne joue pas : {n} joueurs actifs.",
+
+    // Composition
+    compositionTitle: "Composition du village",
+    compositionCount: "{r} rôles définis pour {p} joueurs.",
+    distribute: "Distribuer les rôles",
+    rolesProgress: "{r} / {p} rôles",
+
+    // Distribution
+    distributing: "Distribution des rôles…",
+    playerXofY: "Joueur {i} / {n}",
+    passPhoneTo: "Passez le téléphone à {name}, puis révélez la carte à l'abri des regards.",
+    discoverRole: "Découvrir mon rôle",
+    memorized: "J'ai mémorisé mon rôle",
+    handoverTitle: "Donnez le téléphone au Meneur de Jeu",
+    handoverText:
+      "Les cartes sont distribuées. Je suis le Meneur : à partir de maintenant, je conserve le téléphone. Je vais diriger les nuits, les aubes et le vote du village.",
+    captainElection: "Élection du Capitaine",
+    captainElectionDesc:
+      "Le village élit son Capitaine à main levée. Son rôle secret reste masqué : seul le MJ voit ce badge. Le Général ne peut pas être élu.",
+    randomSelect: "🎲 Choix aléatoire",
+    noCaptain: "Jouer sans Capitaine",
+    startGame: "Lancer la partie",
+
+    // Game
+    nightN: "Nuit {n}",
+    dayN: "Jour {n}",
+    village: "Village ({n} vivants)",
+    mjDashboard: "Tableau de bord MJ — Rôles secrets visibles",
+    nightEnds: "La nuit s'achève sur le village endormi.",
+    raiseDay: "Réveiller le village",
+    captain: "Capitaine",
+    captainX2: "Capitaine ×2",
+    cannotVote: "Ne vote pas",
+    immune: "Immunisé",
+    wolfTag: "Loup",
+    converted: " (Converti)",
+    convertedInfo: "Changé en Loup-Garou (info MJ)",
+
+    // Night
+    secretWordTitle: "Mot secret du Loup Bavard",
+    secretWordHint:
+      "Montrez cet écran au Loup Bavard. Il doit obligatoirement placer ce mot dans le débat du matin.",
+    editWord: "Modifier le mot",
+    bavardSeen: "Le Loup Bavard a vu son mot",
+    packAgrees: "La meute est d'accord",
+    disagreement: "Désaccord — La Matriarche tranche seule",
+    infectPlayer: "Infecter {name} (1 seule fois par partie)",
+    noirSoloVictimTitle: "Désignation de la victime",
+    noirSoloConfirm: "Le Loup Noir frappe",
+    muteTitle: "Imposer le silence (optionnel)",
+    muteUnavailable: "Le pouvoir de silence est disponible à partir de la Nuit 2.",
+    bearNeighbors: "Voisins directs (info MJ)",
+    left: "Gauche",
+    right: "Droite",
+    infected: " (Infecté)",
+    bearSniff: "L'Ours flaire ses voisins",
+    execPrisoner: "Exécuter le prisonnier",
+    healSave: "Sauver {name}",
+    poisonPotion: "Potion de mort (optionnel)",
+    witchTargetProtected: "Le Salvateur protège déjà cette victime — potion de soin inutile.",
+
+    // Dawn & debate
+    debateTitle: "Débat — Jour {n}",
+    debateText: "Le Capitaine ouvre le débat, chaque joueur s'exprime, puis le Capitaine conclut.",
+    captainMutedHint:
+      "Capitaine rendu muet : ne prend pas la parole (ni ouverture ni conclusion), mais conserve tous ses choix (sens du débat, ordre du vote, moment où il vote).",
+    mutedBy: "Médiatement rendus muets par le Loup Noir : {names}",
+    dawnTitle: "Aube — Jour {n}",
+    bavardWordOfDay: "Loup Bavard, ton mot du jour :",
+    firstDayVoteQuestion:
+      "Villageois, souhaitez-vous voter en ce premier jour ? Ce matin seulement, le vote est optionnel.",
+    vote: "Voter",
+    noVote: "Pas de vote",
+    forceVote: "Le MJ force le vote du village",
+    speaker: "Débat — Intervenant {i} / {n}",
+    opening: "Ouverture",
+    closing: "Conclusion",
+    pause: "Pause",
+    resume: "Reprendre",
+    endDebate: "Terminer le débat",
+    extend30: "+30s",
+
+    // Debate wheel & vote
+    rotationClockwise: "Sens horaire",
+    rotationCounter: "Sens anti-horaire",
+    captainDirTitle: "Sens du débat",
+    captainDirText: "{name}, en tant que Capitaine, choisissez le sens du tour de parole.",
+    dirClockwise: "Sens horaire (à la gauche du Capitaine)",
+    dirCounterClockwise: "Sens anti-horaire (à la droite du Capitaine)",
+    noCaptainDir: "Pas de Capitaine : sens horaire appliqué par défaut.",
+    setupDebateDir: "Sens du débat",
+    setupVoteDir: "Sens du vote",
+    setupCaptainTiming: "Vote du Capitaine",
+    captainVotesFirst: "En premier",
+    captainVotesLast: "En dernier",
+    timerLockedHint: "Le chrono de débat ne démarre qu'après la validation de ces choix.",
+    confirmCaptainSetup: "Valider & Ouvrir le débat",
+    voteSetupTitle: "Configuration du vote",
+    voteSetupText: "{name}, choisissez le sens du vote et le moment de votre vote.",
+    confirmVoteSetup: "Valider & Lancer le vote",
+    captainRevoteOneVote: "Revote : le Capitaine ne dispose que d'une seule voix.",
+    captainOpening: "Discours d'ouverture",
+    captainClosing: "Discours de conclusion",
+    captainSplitTitle: "Capitaine — 2 points de vote",
+    captainVoteBoth: "2 points sur 1 joueur",
+    captainVoteSplit: "Séparer : 1 point + 1 point",
+    captainSplitPickA: "Premier point",
+    captainSplitPickB: "Second point",
+    captainSplitConfirm: "Valider le vote du Capitaine",
+    splitBadge: "Vote séparé",
+    auditSplitLine: "{voter} ➔ Séparation : {target} + {target2}",
+    auditDoubleLine: "{voter} ➔ {target} ×2",
+    revoteTiedExcluded: "Les joueurs ex æquo ne votent pas lors de ce revote.",
+    doubleElimAnnounce: "Second égalité consécutive : les deux joueurs à égalité sont éliminés.",
+    evalTitle: "Évaluation de la partie",
+    evalMvp: "MVP — Meilleur joueur",
+    evalLvp: "LVP — Joueur le plus en difficulté",
+    evalFactions: "Performance des camps",
+    evalScorecards: "Fiches des joueurs",
+    evalAccuracy: "Précision des votes",
+    evalRoleEff: "Efficacité du rôle",
+    evalVotesCast: "{n} points de vote attribués",
+    evalLeader: "Meneur de vote",
+    evalFollower: "Suiveur",
+    evalNoData: "Pas assez de données pour l'évaluation.",
+    factionWolves: "Loups",
+    factionVillage: "Village",
+    factionSolo: "Solitaires",
+    currentSpeaker: "Intervenant",
+    villageLegend: "Légende du village",
+    startTimer: "Démarrer",
+    pauseTimer: "Pause",
+    resetTimer: "Réinitialiser",
+    plus10: "+10s",
+    nextSpeaker: "Intervenant suivant",
+    nowVoting: "A vous de voter",
+    abstain: "Abstention / Passer",
+    auditTitle: "Audit des votes",
+    auditLine: "{voter} ➔ a voté contre {target}",
+    auditAbstain: "{voter} ➔ s'est abstenu(e)",
+    undoVote: "Annuler",
+    tallyComplete: "Dépouiller & Clôturer le vote",
+    topVoted: "Plus grands nombres de voix",
+    eliminateName: "Éliminer {name}",
+    tieJudgeActive: "Égalité — Le Juge est actif !",
+    passToJudge: "Confier la décision au Juge",
+    tieDetectedWith: "Égalité entre {names}",
+    runRevoteTied: "Relancer le vote (ex æquo uniquement)",
+    captainBreaksTie: "Le Capitaine tranche l'égalité",
+    skipElimination: "Pas d'élimination",
+    voteProgress: "Vote {i} / {n}",
+    votesUnit: "voix",
+
+    // Vote
+    voteTitle: "Vote du village — Jour {n}",
+    revoteSuffix: " (Revote)",
+    voteText:
+      "Le village doit désigner un condamné. Comptez les voix : au moins un joueur doit être éliminé.",
+    logRavenTarget: "Le Corbeau a marqué {name}. Ce joueur commence avec {count} voix contre lui.",
+    voteTotal: "Total attribué : {c} / {t} voix",
+    voteTotalHint:
+      "Le total possible équivaut au nombre de vivants + 1 (voix double du Capitaine).",
+    addVote: "Ajouter une voix à {name}",
+    removeVote: "Retirer une voix à {name}",
+    bavardCheck: "Vérification — Loup Bavard",
+    bavardAsk: "A-t-il prononcé son mot {word} ?",
+    bavardInactiveDay1: "Le Loup Bavard n'a pas joué la nuit 1 — pas de vérification.",
+    tieJudge:
+      "Égalité : Le Juge tranche. Il désigne un ou plusieurs ex æquo à éliminer, ou ordonne un revote.",
+    judgeExecute: "Exécuter le jugement du Juge",
+    orderRevote: "Ordonner un revote",
+    tieBreakOnly: "Départage d'égalité — seuls les {n} ex æquo apparaissent",
+    tieNote: "En cas d'égalité persistante après un revote, tous les ex æquo sont éliminés.",
+    validateExec: "Confirmer l'exécution",
+    bavardPreVoteTitle: "Loup Bavard — Avant le vote",
+    bavardPreVoteAsk: "A-t-il prononcé son mot secret {word} ?",
+    bavardPreVoteYes: "Oui — Le vote continue",
+    bavardPreVoteNo: "Non — Élimination immédiate",
+    gmSelectElim: "Sélection du condamné",
+    gmSelectElimHint: "Sélectionnez le(s) joueur(s) à éliminer.",
+    gmConfirmElim: "Valider l'élimination",
+    gmRevoteAction: "Ordonner un revote",
+    undoStep: "← Retour",
+
+    // Suicide / Revelation
+    causeSuicide: "Suicide / Révélation",
+    gmSuicide: "Suicide / Révélation",
+    suicideTitle: "Suicide / Révélation",
+    suicideDesc:
+      "Désignez un joueur ayant enfreint les règles ou révélé son rôle. Il est immédiatement éliminé et la nuit tombe.",
+    suicideConfirm: "💀 Confirmer l'élimination",
+    suicideDone: "{name} a été éliminé : Suicide / Révélation.",
+
+    // Undo
+    undoLabel: "Précédent",
+    undoDoneToast: "Action annulée",
+
+    // Vote announcement
+    proceedToVote: "Passer au vote",
+    skipVoteDay1: "Jour 1 : passer le vote",
+    voteAnnounceTitle: "Le débat est terminé",
+    voteAnnounceDesc:
+      "Le village doit maintenant se proncer. Chaque joueur va désigner celui qu'il souhaite éliminer.",
+    voteAnnounceContinue: "Lancer le vote",
+    voteAnnounceSkip: "Passer l'annonce",
+    voteAnnounceMandatory: "L'annonce du vote est obligatoire.",
+
+    // Renard
+    renardReportTitle: "Rapport vague du Renard",
+    renardChooseConfidant: "Choisis ton confident",
+    renardFinalNight: "Dernière nuit du Renard",
+    renardConfidantPicked: "Confident désigné : {name}",
+
+    // GM status reminders
+    gmStatusReminders: "Rappels de statut",
+    gmStatusAlive: "{n} joueurs en vie",
+    gmStatusMuted: "Muets : {names}",
+    gmStatusJailed: "Privé de vote : {name}",
+    gmStatusProtected: "Protégé cette nuit",
+    gmStatusNoMuted: "Aucun joueur muet",
+
+    // Black Wolf — actions hub
+    bwHubTitle: "Loup Noir — Actions",
+    bwTabAttack: "Attaque",
+    bwTabInfect: "Infection",
+    bwTabMute: "Silence",
+    bwInfectAvailable: "Infection disponible : 1/1",
+    bwInfectUsed: "Infection déjà utilisée",
+    bwPickAttack: "Désignez la victime de la nuit.",
+    bwPickInfect: "Désignez le joueur à infecter (rejoint la meute au lieu de mourir).",
+    bwPickMute: "Désignez le joueur privé de parole pour le débat du matin.",
+    bwNoVictimHint: "La meute n'a pas encore désigné de victime.",
+    gmTurnGuide: "Tour de {role} — {name}. Guidez le joueur puis validez l'action.",
+    validateAction: "Valider l'action",
+    passTurn: "Passer le tour",
+
+    // Summary — badges & evaluation
+    recapRounds: "{n} tours",
+    turningPointTitle: "Tournant de la partie",
+    turningPointNone: "Aucun tournant décisif enregistré.",
+    turningPointLine: "Jour {d} : L'élimination de {name} ({role}) a fait basculer la partie.",
+    badgesTitle: "Badges de fin de partie",
+    badgeMastermind: "Le Cerveau",
+    badgeMastermindDesc: "MVP : lecture parfaite et votes décisifs.",
+    badgeEagleEye: "Œil de Lynx",
+    badgeEagleEyeDesc: "Plus haute précision de vote.",
+    badgeOscar: "Oscar du meilleur acteur",
+    badgeOscarDesc: "Le Loup ayant fait éliminer le plus de villageois.",
+    badgeGuardian: "Ange Gardien",
+    badgeGuardianDesc: "A sauvé le plus de vies.",
+    badgeBandwagoner: "Le Suiveur",
+    badgeBandwagonerDesc: "Toujours avec la majorité, aucune prise de risque.",
+    badgeBlindSniper: "Tireur à l'aveugle",
+    badgeBlindSniperDesc: "Plus basse précision de vote.",
+    badgeIceCold: "Sang Froid",
+    badgeIceColdDesc: "Décisif dans le dernier carré des 4 survivants.",
+    badgeSuicidal: "Révélation Suicidaire",
+    badgeSuicidalDesc: "A gâché la partie en révélant son rôle.",
+    evalDeception: "Indice de bluff",
+    evalClutch: "Sauvetage in extremis",
+    evalEarlyPush: "Prises d'initiative",
+    evalBandwagon: "Suivisme",
+    evalHistory: "Historique des actions",
+
+    // Events
+    captainSuccession: "Succession du Capitaine",
+    captainSuccessionText:
+      "{name} est tombé. Avant de s'éteindre, il désigne lui-même son successeur : aucun vote.",
+    transmit: "Transmettre le pouvoir",
+    hunterTitle: "Dernier souffle du Chasseur",
+    hunterText: "Le Chasseur s'effondre, mais son fusil résonne une dernière fois.",
+    shoot: "Tirer",
+    eliminated: "Éliminé",
+    villageStrikes: "Le village frappe fort",
+    villageDecided: "Le village a tranché",
+
+    // Transitions
+    nightFalls: "La nuit tombe",
+    dayRises: "Le jour se lève",
+    tapToContinue: "Touchez pour continuer",
+    nightSubtitle: "Nuit {n} — Que tout le monde ferme les yeux",
+    daySubtitle: "Jour {n} — Le village se réveille",
+
+    // Game Summary
+    bilanTitle: "Bilan de la partie",
+    bilanMvp: "⭐ MVP de la partie",
+    bilanMvpScore: "{n} pts",
+    bilanVoteHistory: "Historique des votes",
+    bilanDayVote: "Jour {n}",
+    bilanRevoteSuffix: " (Revote)",
+    bilanElim: "→ {names}",
+    bilanNobodyElim: "→ Personne",
+    bilanTeamDomination: "Domination stratégique",
+    bilanVillageCtrl: "🏘️ Village : {pct}%",
+    bilanWolfCtrl: "🐺 Loups : {pct}%",
+    bilanBalanced: "Partie extrêmement équilibrée",
+    bilanDuration: "{d} jour(s) de jeu",
+    bilanSurvivors: "Survivants : {n}",
+    bilanNoVotes: "Aucun vote enregistré.",
+
+    // End
+    gameOver: "Fin de la partie",
+    gameOverFallback: "La partie est terminée.",
+    recap: "Récapitulatif",
+    colPlayer: "Joueur",
+    colRole: "Rôle",
+    colTeam: "Camp",
+    colStatus: "Statut",
+    statusAlive: "Vivant",
+    statusDead: "Mort",
+    statusContaminated: "Infecté",
+
+    // Summary Card
+    recapVictoryWolves: "Victoire des Loups-Garous",
+    recapVictoryVillage: "Victoire du Village",
+    recapVictoryLovers: "Victoire des Amoureux",
+    recapVictorySolo: "Victoire Solitaire",
+    recapVictoryBlackWolf: "Domination du Loup Noir",
+    recapRoster: "Joueurs",
+    recapTimeline: "Chronologie de la partie",
+    recapNoEvents: "Aucun événement marquant.",
+    recapNightN: "Nuit {n}",
+    recapDayN: "Jour {n}",
+    recapRescued: "Sauvé — {role}",
+    recapContaminatedBy: "Infecté par le Loup Noir",
+    playAgain: "Rejouer une partie",
+    shareRecap: "Partager le bilan",
+    shareCopied: "Bilan copié dans le presse-papier !",
+    causeWolves: "Dévoré par les loups",
+    causePoison: "Empoisonné par la Sorcière",
+    causeWhiteWolf: "Tué par le Loup Blanc",
+    causeHunter: "Abattu par le Chasseur",
+    causeHeartbreak: "Mort de chagrin",
+    causeVote: "Éliminé par le vote du village",
+    causeJailer: "Exécuté par le Geôlier",
+    causeSpy: "Démaqué en train d'espionner",
+    causeTalkative: "Le Loup Bavard n'a pas dit son mot",
+    causeGeneralStrike: "Abattu par le Général",
+    causeGeneralFailed: "Échec du Général",
+    causeManiac: "Assassiné par le Maniaque",
+    causeThreeFacesPoison: "Empoisonné par les 3 faces",
+    causePuppetProtection:
+      "Impact fatal — La marionnette a encaissé la coup à la place du Marionnettiste",
+
+    // Night Report
+    nightReportTitle: "Rapport de la Nuit {n}",
+    nightReportSubtitle: "Synthèse complète des actions — Écran silencieux réservé au Meneur.",
+    nightReportActions: "Actions nocturnes",
+    nightReportOutcomes: "Bilan de la nuit",
+    nightReportEmpty: "Aucune action nocturne enregistrée.",
+    nightReportClose: "Réveiller le village",
+    nightReportMuted: "🔇 Aucune narration, aucun son.",
+
+    // 3 faces
+    facesChoosePower: "Choisissez le visage à révéler cette nuit (chaque pouvoir une seule fois)",
+    facesProtect: "🛡️ Protection (Salvateur)",
+    facesPotion: "⚗️ Potion (Sorcière)",
+    facesInspect: "🔮 Inspection (Voyante)",
+    facesLifePotion: "Potion de vie — Sauver {name}",
+    facesPoisonPotion: "Potion de mort — Choisir une cible",
+    facesPickTarget: "Choisir une cible",
+    facesNoPowerLeft: "Les 3 faces ont déjà été utilisées.",
+    facesRemaining: "Pouvoirs restants : {n}",
+
+    // Thief, Maniac & Puppeteer
+    thiefPickTarget: "Choisissez le joueur dont vous volez le rôle",
+    maniacPickTarget: "Choisissez la victime (aucune protection ne peut l'arrêter)",
+    marionnettistePickTarget: "Choisissez le joueur qui portera votre marionnette",
+    marionnetteTag: " (Marionnette)",
+
+    ultimateShield: "Bouclier Suprême",
+    ultimateShieldDesc:
+      "Protège tout le village contre les loups et l'infection pour cette nuit. Usage unique.",
+    ultimateShieldWarn:
+      "Attention : une fois activé, le Salvateur perd définitivement tous ses pouvoirs de protection.",
+    ultimateShieldActivate: "Activer le Bouclier Suprême",
+    ultimateShieldConfirm: "Oui, activer et perdre mes pouvoirs",
+    voteRanking: "Classement des votes — Du plus voté au moins voté",
+
+    newWordPlaceholder: "Nouveau mot…",
+    cancel: "Annuler",
+    roleWakeAlt: "Réveil du rôle {role}",
+
+    // GM Stars
+    starAward: "Accorder une étoile à {name}",
+    starRemove: "Retirer une étoile à {name}",
+    starsLabel: "Étoiles",
+    starsHint:
+      "Appuyez sur ⭐ sur la fiche d'un joueur pour récompenser une bonne déduction. Appui long pour retirer une étoile.",
+    starsEarned: "{n} ⭐",
+    badgeStarTown: "Détective d'Élite",
+    badgeStarTownDesc: "Villageois ayant obtenu le plus d'étoiles du Meneur.",
+    badgeStarWolf: "Maître Manipulateur",
+    badgeStarWolfDesc: "Loup ayant obtenu le plus d'étoiles pour ses feintes.",
+
+    // GM Guide
+    guideButton: "Guide du Meneur",
+    guideTitle: "Guide du Meneur de Jeu",
+    guideStepOf: "Étape {i} / {n}",
+    guideClose: "Fermer le guide",
+    guideStart: "C'est parti !",
+
+    // Fox & Confidant — Joker mechanics
+    foxReveal: "🦊 Révélation du Renard",
+    foxRevealDesc:
+      "Le Renard révèle publiquement les événements nocturnes : suicide immédiat. Le confident devient le Joker.",
+    foxRevealConfirm: "Confirmer la révélation du Renard",
+    confidantReveal: "📜 Révélation du Confident",
+    confidantRevealDesc:
+      "Le confident révèle les secrets du Renard : suicide immédiat. Le Renard devient le Joker.",
+    confidantRevealConfirm: "Confirmer la révélation du Confident",
+    jokerAssignedToast: "{name} est maintenant le Joker !",
+    foxRevealDoneToast: "{name} (Renard) a été éliminé : suicide. {confidant} devient le Joker.",
+    confidantRevealDoneToast: "{name} (Confident) a été éliminé : suicide. {fox} devient le Joker.",
+
+    // GM Notes
+    gmNotesTitle: "Notes du Meneur",
+    gmNotesShow: "Afficher",
+    gmNotesHide: "Masquer",
+    gmNotesPlaceholder: "Prenez vos notes ici (ex: indices, soupçons, alliances)...",
+
+    // Guide modal — rules
+    guideRulesTitle: "Règles & Astuces de Gestion",
+    guideRulesNight:
+      "Nuit : Suivez les appels de l'écran dans l'ordre. Chaque rôle effectue son action secrètement.",
+    guideRulesDawn:
+      "Aube : Révélez le rapport de la nuit et lancez la roue de débat. Les joueurs s'expriment à tour de rôle.",
+    guideRulesVote:
+      "Vote : Suivez le sens de la roue pour recueillir les choix de chaque villageois en toute équité.",
+    guideRulesUndo:
+      "Bouton Annuler : Si vous faites une erreur de saisie pendant la nuit ou le vote, vous pouvez revenir en arrière.",
+    guideCloseBtn: "Fermer",
+
+    // Defense timer
+    defenseTitle: "Temps de Défense ({n} votes)",
+    defenseDesc: "{name} dispose d'une minute pour plaider sa cause !",
+    pauseBtn: "Pause",
+    startBtn: "Démarrer",
+    endDefense: "Terminer la défense",
+
+    // Penalty toasts
+    penaltyRemovedToast: "Pénalité retirée à {name}",
+    penaltyAddedToast: "Pénalité de débat infligée à {name}",
+
+    // Skip vote during first day voting
+    skipVoteDay1Vote: "Passer le vote (Jour 1)",
+    penaltyBadgeHint: "Tap : +1 Pénalité | Appui long (0.5s) : Retirer pénalité",
+    guideStep1Kicker: "Étape 1",
+    guideStep1Title: "Mise en place & Joueurs",
+    guideStep1Body:
+      "Entrez les prénoms de chaque joueur puis touchez '+ Ajouter un joueur'. Choisissez votre composition de rôles et la durée du chrono de débat avant de lancer.",
+    guideStep2Kicker: "Étape 2",
+    guideStep2Title: "Distribution & Rôles secrets",
+    guideStep2Body:
+      "Passez le téléphone de main en main : chaque joueur prend connaissance de sa carte en secret, la mémorise puis la referme avant de passer l'appareil.",
+    guideStep3Kicker: "Étape 3",
+    guideStep3Title: "Déroulement de la Nuit",
+    guideStep3Body:
+      "Le Meneur éveille les rôles un à un (Loups, Voyante, Sorcière...). Touchez les avatars des joueurs pour valider les actions : dévorer, sauver, sonder ou faire taire.",
+    guideStep4Kicker: "Étape 4",
+    guideStep4Title: "Le Jour, Débat & Étoiles ⭐",
+    guideStep4Body:
+      "Lisez le rapport de nuit, laissez le Capitaine fixer le sens du débat, puis faites tourner le cercle. Les muets passent leur tour. Touchez l'étoile pour récompenser les belles déductions.",
+    guideStep5Kicker: "Étape 5",
+    guideStep5Title: "Vote & Élimination",
+    guideStep5Body:
+      "Enregistrez les votes joueur par joueur. La voix du Capitaine tranche en cas d'égalité, sinon un revote est proposé. Le mort révèle son rôle et applique ses pouvoirs.",
+    guideStep6Kicker: "Étape 6",
+    guideStep6Title: "Fin de partie & Bilan",
+    guideStep6Body:
+      "A la victoire, l'écran de bilan affiche les cartes d'évaluation : précision des votes, efficacité du rôle, étoiles récoltées et badges d'honneur.",
+
+    // Orientation
+    rotateTitle: "Pivotez votre téléphone",
+    rotateText:
+      "Nightfall Oracle se joue en mode portrait. Remettez votre appareil à la verticale pour continuer.",
+
+    // Missing keys — added for full localization
+    pass: "Passer le tour",
+    witchLifePotion: "Potion de vie",
+    witchLifeUsed: "Potion de vie déjà utilisée",
+    witchSavingVictim: "Sauvetage de {name}",
+    witchSaveVictimPrompt: "Sauver {name} (Potion de vie)",
+    nobodyAttacked: "Personne n'a été attaqué cette nuit.",
+    witchDeathPotion: "Potion de mort (Poison)",
+    witchDeathUsed: "Potion de mort déjà utilisée",
+    bwInfectingTarget: "Infection de {name}",
+    bwInfectPrompt: "Infecter {name} (rejoint la meute au lieu de mourir)",
+    bwNoVictimToInfect: "Aucune victime à infecter.",
+    facesHealVictim: "Sauver {name} (Potion de vie)",
+    facesNoVictimToHeal: "Aucune victime à sauver",
+    facesSwitchPoison: "Passer à la Potion de mort",
+    bearLeftNeighbor: "Voisin de gauche",
+    bearRightNeighbor: "Voisin de droite",
+    bearStatusGrowling: "🐻 L'Ours GROGNE ! (Au moins 1 loup à proximité)",
+    bearStatusCalm: "🐻 L'Ours est calme (Aucun loup à proximité)",
+    petiteFillePeek: "Espionner les Loups-Garous",
+    petiteFilleSleep: "Rester endormie en sécurité",
+    ultimateShieldToggle: "Activer le Bouclier Suprême (Usage unique)",
+    hunterShotTitle: "Vengeance du Chasseur",
+    hunterShotDesc: "{name} a été éliminé ! Il peut emporter un dernier joueur avec lui.",
+    hunterFireConfirm: "Tirer sur la cible sélectionnée",
+    captainSuccessionTitle: "Succession du Capitaine",
+    captainSuccessionDesc: "{name} est tombé et doit désigner le nouveau Capitaine.",
+    assignCaptainConfirm: "Transmettre le Capitainerie",
+    dawnSummaryTitle: "Résumé de l'Aube",
+    eventsTitle: "Événements de la nuit",
+    skipDay1Vote: "Passer le vote du Jour 1 (Optionnel)",
+  },
+  prompts: {
+    ...NEW_ROLE_LOCALES.fr.prompts,
+    cupidon: "Désigne les deux amoureux.",
+    mime: "Choisis le joueur dont tu copies le rôle.",
+    "enfant-sauvage": "Choisis ton modèle.",
+    geolier: "Qui prives-tu de son droit de vote pour le débat de demain ?",
+    voyante: "Quel joueur veux-tu sonder ?",
+    salvateur: "Qui protèges-tu cette nuit ? (jamais deux fois de suite)",
+    "petite-fille": "Tu entrouvres les yeux… veux-tu espionner la meute ?",
+    "loup-garou": "La meute désigne sa victime. En cas de désaccord, la Matriarche tranche seule.",
+    "loup-noir": "Contamine la victime (une fois par partie) et/ou impose le silence à un joueur.",
+    "loup-blanc": "Veux-tu dévorer un loup cette nuit ?",
+    "loup-bavard":
+      "Le Maître du Jeu montre le mot secret : il devra être prononcé pendant le débat du matin.",
+    sorciere: "Utilise tes potions.",
+    "joueur-de-flute": "Enchante des joueurs.",
+    corbeau: "Sur qui déposes-tu la plume noire ?",
+    tavernier: "À qui offers-tu un verre ?",
+    general: "Désigne le joueur que tu veux abattre. Si ce n'est pas un loup, tu meurs.",
+    "montreur-dours": "L'ours flaire ses voisins…",
+    "trois-faces": "Choisis l'un de tes trois visages : protéger, une potion, ou inspecter.",
+    voleur: "Vole le rôle d'un joueur : il devient Simple Villageois.",
+    maniaque: "Désigne la victime que rien ne peut protéger.",
+    marionnettiste: "Sur qui places-tu ta marionnette cette nuit ?",
+    renard: "Tu reçois un rapport vague des événements de la nuit.",
+  } as Record<string, string>,
+  teams: {
+    VILLAGEOIS: "Village",
+    WEREWOLVES: "Loups",
+    SOLO: "Solitaire",
+    LOVERS: "Amoureux",
+    DYNAMIC: "Dynamique",
+  } as Record<string, string>,
+  roles: {
+    ...NEW_ROLE_LOCALES.fr.roles,
+    marionnettiste: {
+      name: "Le Marionnettiste",
+      description:
+        "Artisan des ombres, il fabrique une marionnette bouclier lors de la 2ème nuit pour encaisser une attaque mortelle de loups-garous à sa place.",
+      power:
+        "Il s'éveille uniquement à la Nuit 2 pour équiper sa marionnette. S'il est attaqué par les loups, sa poupée absorbe le coup : il survit, mais le choc le rend définitivement muet.",
+    },
+    renard: {
+      name: "Renard",
+      description:
+        "Le renard rôdeur du village. Chaque nuit, il reçoit un rapport nocturne vague du Maître du Jeu. Lors de sa dernière nuit d'information, il doit choisir un confident à qui transmettre ses secrets.",
+      power:
+        "Chaque nuit, le Maître du Jeu informe sommairement le Renard des événements survenus. Lors de sa dernière nuit, il désigne un confident. Si l'un des deux révèle publiquement ces informations, il est éliminé et l'autre devient le JOKER.",
+    },
+  } as Record<string, { name: string; description: string; power: string }>,
+};
+
+export type UiKey = keyof typeof fr.ui;
+export type Dictionary = typeof fr;

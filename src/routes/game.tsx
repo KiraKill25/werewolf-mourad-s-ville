@@ -1,0 +1,2065 @@
+import { Button } from "@/components/ui/button";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { useBackHandler } from "@/lib/back-navigation";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Check,
+  ChevronRight,
+  Crown,
+  Droplet,
+  Eye,
+  Flame,
+  Heart,
+  HelpCircle,
+  Info,
+  MicOff,
+  Moon,
+  Pencil,
+  RotateCcw,
+  Shield,
+  Skull,
+  Sparkles,
+  Sun,
+  Swords,
+  UserX,
+  Volume2,
+  VolumeX,
+  X,
+} from "lucide-react";
+import { OverlayCard } from "@/components/OverlayCard";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { MuteButton } from "@/components/MuteButton";
+import { ROLE_BY_ID, ROLES, roleImage } from "@/data/roles";
+import { NarratorCard } from "@/components/NarratorCard";
+import { PhaseTransition } from "@/components/PhaseTransition";
+import { SpeakButton } from "@/components/SpeakButton";
+import { DebateSetupModal, DebateWheel, VoteSetupModal } from "@/components/DebateWheel";
+import { VoteWheel } from "@/components/VoteWheel";
+import type { RotationDirection } from "@/components/SeatingWheel";
+import { EliminationReveal } from "@/components/EliminationReveal";
+import { GameRecapCard, type VoteRecord } from "@/components/GameRecapCard";
+import { useI18n } from "@/lib/i18n";
+import { useNarrate } from "@/hooks/use-narrate";
+import { nk } from "@/lib/narration";
+import { NightReportCard } from "@/components/NightReportCard";
+import { clearBgm, playCheer, playWolfHowl, speakRole, startBgm } from "@/lib/audio";
+import {
+  clearGame,
+  loadGame,
+  loadSettings,
+  loadSetup,
+  saveGame,
+  type GameSettings,
+} from "@/lib/session";
+import {
+  addDebatePenalty,
+  assignCaptain,
+  bearNeighbors,
+  canWitchHeal,
+  confidantReveal,
+  createGame,
+  currentStep,
+  effectiveRoleId,
+  foxReveal,
+  goToVote,
+  preVoteActor,
+  ravenVoteCount,
+  applyJailor,
+  applyRaven,
+  resolveBabyWolf,
+  resolveHunter,
+  skipVote,
+  submitStep,
+  suicideRevealMany,
+  type GameState,
+  type Player,
+} from "@/game/engine";
+
+const TITLE = "Partie en cours — Nightfall Oracle";
+const DESC = "Le meneur guide la nuit, l'aube et le vote du village, tour après tour.";
+
+export const Route = createFileRoute("/game")({
+  head: () => ({
+    meta: [
+      { title: TITLE },
+      { name: "description", content: DESC },
+      { property: "og:title", content: TITLE },
+      { property: "og:description", content: DESC },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
+  component: GamePage,
+});
+
+function GamePage() {
+  const navigate = useNavigate();
+  const { t } = useI18n();
+  const narrate = useNarrate();
+  const [state, setState] = useState<GameState | null>(null);
+  const [settings, setSettings] = useState<GameSettings | null>(null);
+  const [transition, setTransition] = useState<"NIGHT" | "DAY" | null>("NIGHT");
+  const [victims, setVictims] = useState<{ id: string; name: string; roleId: string }[] | null>(
+    null,
+  );
+  const [debateDoneDay, setDebateDoneDay] = useState(0);
+  const [preVoteOpen, setPreVoteOpen] = useState(false);
+  const [direction, setDirection] = useState<RotationDirection>("clockwise");
+  const [voteDirection, setVoteDirection] = useState<RotationDirection>("clockwise");
+  const [captainVotesFirst, setCaptainVotesFirst] = useState(true);
+  const [directionDay, setDirectionDay] = useState(0);
+  const [voteSetupDay, setVoteSetupDay] = useState(0);
+  const [reportDay, setReportDay] = useState(0);
+  const [voteHistory, setVoteHistory] = useState<VoteRecord[]>([]);
+  const [stateHistory, setStateHistory] = useState<GameState[]>([]);
+  const [suicideOpen, setSuicideOpen] = useState(false);
+  const [guideModalOpen, setGuideModalOpen] = useState(false);
+  const [gmNotesOpen, setGmNotesOpen] = useState(false);
+  const [gmNotesText, setGmNotesText] = useState("");
+  const [voteAnnounce, setVoteAnnounce] = useState(false);
+  const lastPhase = useRef<string>("");
+
+  const updateState = (next: GameState) => {
+    setState((cur) => {
+      if (cur) setStateHistory((h) => [...h, cur].slice(-30));
+      return next;
+    });
+  };
+
+  const removePenalty = (playerId: string) => {
+    if (!state) return;
+    const p = state.players.find((x) => x.id === playerId);
+    if (p && (p.penaltyVotes ?? 0) > 0) {
+      updateState({
+        ...state,
+        players: state.players.map((x) =>
+          x.id === playerId
+            ? {
+                ...x,
+                penaltyVotes: Math.max(0, (x.penaltyVotes ?? 0) - 1),
+                totalPenalties: Math.max(0, (x.totalPenalties ?? 0) - 1),
+              }
+            : x,
+        ),
+      });
+      toast.info(t("penaltyRemovedToast", { name: p.name }));
+    }
+  };
+
+  const undo = () => {
+    setStateHistory((h) => {
+      const prev = h[h.length - 1];
+      if (prev) {
+        setState(prev);
+        toast(t("undoDoneToast"));
+      }
+      return h.slice(0, -1);
+    });
+  };
+
+  const canUndo = stateHistory.length > 0;
+
+  useEffect(() => {
+    setSettings(loadSettings());
+    const saved = loadGame<GameState>();
+    if (saved) {
+      setState(saved);
+      return;
+    }
+    const setup = loadSetup();
+    if (setup?.players?.length) setState(createGame(setup.players, setup.villageCaptainId));
+    else navigate({ to: "/setup" });
+  }, [navigate]);
+
+  useEffect(() => {
+    if (!state) return;
+    const isNight = state.phase.startsWith("NUIT");
+    const key = isNight ? `N${state.night}` : `${state.phase}${state.day}`;
+    if (lastPhase.current && lastPhase.current !== key) {
+      if (isNight) setTransition("NIGHT");
+      else if (state.phase === "AUBE") setTransition("DAY");
+    }
+    lastPhase.current = key;
+  }, [state]);
+
+  useEffect(() => {
+    if (state?.phase !== "FIN") return;
+    if (state.winnerTeam === "WOLVES") playWolfHowl();
+    else playCheer();
+  }, [state?.phase, state?.winnerTeam]);
+
+  useEffect(() => {
+    if (state) saveGame(state);
+  }, [state]);
+
+  useEffect(() => {
+    if (!state) return;
+    if (state.phase === "FIN") {
+      clearBgm();
+      return;
+    }
+    startBgm(state.phase.startsWith("NUIT") ? "NIGHT" : "DAY");
+  }, [state?.phase]);
+
+  useEffect(() => () => clearBgm(), []);
+
+  // Retour Android : ferme d'abord la fenêtre ouverte, sinon annule la dernière étape.
+  useBackHandler(() => {
+    if (guideModalOpen) return setGuideModalOpen(false), true;
+    if (suicideOpen) return setSuicideOpen(false), true;
+    if (preVoteOpen) return setPreVoteOpen(false), true;
+    if (voteAnnounce) return setVoteAnnounce(false), true;
+    if (stateHistory.length > 0) return undo(), true;
+    if (window.confirm(t("quit") + " ?")) {
+      clearGame();
+      navigate({ to: "/" });
+    }
+    return true;
+  });
+
+  if (!state) return <main className="p-8 text-muted-foreground">{t("loading")}</main>;
+
+  if (state.phase === "FIN")
+    return (
+      <GameRecapCard
+        state={state}
+        voteHistory={voteHistory}
+        onRestart={() => {
+          clearGame();
+          navigate({ to: "/" });
+        }}
+        onPlayAgain={() => {
+          clearGame();
+          navigate({ to: "/composition" });
+        }}
+      />
+    );
+
+  const isNight = state.phase.startsWith("NUIT");
+  const overlayFree =
+    !state.reveal &&
+    !transition &&
+    !victims &&
+    !state.captainSuccessionPending &&
+    state.phase !== "EVENEMENT_MORT";
+
+  // Le rapport de nuit passe avant la succession du Capitaine mort pendant la nuit.
+  const needsNightReport =
+    !isNight &&
+    state.phase === "AUBE" &&
+    reportDay !== state.day &&
+    !state.reveal &&
+    !transition &&
+    !victims;
+  const successionWaitsForReport =
+    !!state.captainSuccessionPending && state.phase === "AUBE" && reportDay !== state.day;
+  const needsDebateSetup =
+    !isNight &&
+    state.phase === "AUBE" &&
+    !needsNightReport &&
+    directionDay !== state.day &&
+    overlayFree;
+  const needsVoteSetup =
+    !isNight && state.phase === "JOUR_VOTE" && voteSetupDay !== state.day && overlayFree;
+  const phaseLabel = isNight ? t("nightN", { n: state.night }) : t("dayN", { n: state.day });
+
+  const mutedPlayers = state.players.filter((p) => p.alive && p.mutedForDay);
+  const fuelPlayers = state.players.filter((p) => p.alive && p.doused);
+  const aliveCount = state.players.filter((p) => p.alive).length;
+
+  return (
+    <main className="mx-auto min-h-screen w-full max-w-lg space-y-5 box-border overflow-x-hidden overflow-y-auto px-4 py-6 pb-16">
+      <header className="sticky top-0 z-40 -mx-4 flex items-center justify-between gap-2 bg-background/80 px-4 py-2 backdrop-blur">
+        <div className="flex items-center gap-2">
+          {isNight ? (
+            <Moon className="size-4 text-indigo-400" />
+          ) : (
+            <Sun className="size-4 text-amber-400" />
+          )}
+          <span className="text-xs font-bold tracking-widest text-muted-foreground uppercase">
+            {phaseLabel}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          {canUndo && (
+            <button
+              onClick={undo}
+              aria-label={t("undoLabel")}
+              title={t("undoLabel")}
+              className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-xs font-semibold text-muted-foreground transition active:scale-95"
+            >
+              <RotateCcw className="size-3.5" />
+              <span>{t("undoLabel")}</span>
+            </button>
+          )}
+          {!isNight && (
+            <button
+              onClick={() => setSuicideOpen(true)}
+              aria-label={t("gmSuicide")}
+              title={t("gmSuicide")}
+              className="flex items-center gap-1 rounded-full border border-destructive/60 px-2.5 py-1.5 text-xs font-semibold text-destructive transition active:scale-95"
+            >
+              <Skull className="size-3.5" />
+              <span className="hidden sm:inline">{t("gmSuicide")}</span>
+            </button>
+          )}
+          <button
+            onClick={() => setGuideModalOpen(true)}
+            aria-label={t("guideButton")}
+            title={t("guideTitle")}
+            className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-xs font-semibold text-muted-foreground transition active:scale-95"
+          >
+            <HelpCircle className="size-3.5" />
+          </button>
+          <LanguageSwitcher />
+          <MuteButton />
+          <button
+            onClick={() => {
+              clearGame();
+              navigate({ to: "/" });
+            }}
+            className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-primary"
+          >
+            {t("quit")}
+          </button>
+        </div>
+      </header>
+
+      {overlayFree && (mutedPlayers.length > 0 || true) && (
+        <div className="flex flex-wrap items-center gap-2 text-[11px]">
+          <span className="rounded-full border border-border bg-card/60 px-2.5 py-1 font-semibold text-muted-foreground">
+            {t("gmStatusAlive", { n: aliveCount })}
+          </span>
+          {mutedPlayers.length > 0 && (
+            <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 font-semibold text-amber-400">
+              {t("gmStatusMuted", { names: mutedPlayers.map((p) => p.name).join(", ") })}
+            </span>
+          )}
+          {fuelPlayers.length > 0 && (
+            <span className="rounded-full border border-destructive/40 bg-destructive/10 px-2.5 py-1 font-semibold text-destructive">
+              🔥 {t("fuelStatus")}: {fuelPlayers.map((p) => p.name).join(", ")}
+            </span>
+          )}
+        </div>
+      )}
+
+      {transition && (
+        <PhaseTransition
+          kind={transition}
+          subtitle={
+            transition === "NIGHT"
+              ? t("nightSubtitle", { n: state.night })
+              : t("daySubtitle", { n: state.day })
+          }
+          onDone={() => setTransition(null)}
+        />
+      )}
+
+      {suicideOpen && (
+        <SuicideModal
+          state={state}
+          onClose={() => setSuicideOpen(false)}
+          onConfirm={(ids) => {
+            const names = ids
+              .map((id) => state.players.find((p) => p.id === id)?.name ?? "")
+              .filter(Boolean);
+            setSuicideOpen(false);
+            updateState(suicideRevealMany(state, ids));
+            names.forEach((name) => toast.error(t("suicideDone", { name })));
+          }}
+        />
+      )}
+
+      {guideModalOpen && <GuideModal onClose={() => setGuideModalOpen(false)} />}
+
+      {victims && <EliminationReveal victims={victims} onClose={() => setVictims(null)} />}
+
+      {state.reveal && (
+        <Overlay onClose={() => setState({ ...state, reveal: undefined })}>
+          {narrate(state.reveal)}
+        </Overlay>
+      )}
+
+      {needsNightReport && (
+        <NightReportCard state={state} onClose={() => setReportDay(state.day)} />
+      )}
+
+      {needsDebateSetup && (
+        <DebateSetupModal
+          captainName={state.players.find((p) => p.id === state.villageCaptainId)?.name}
+          captainMuted={!!state.players.find((p) => p.id === state.villageCaptainId)?.mutedForDay}
+          onConfirm={(d) => {
+            setDirection(d);
+            setDirectionDay(state.day);
+          }}
+        />
+      )}
+
+      {needsVoteSetup && (
+        <VoteSetupModal
+          captainName={state.players.find((p) => p.id === state.villageCaptainId)?.name}
+          captainMuted={!!state.players.find((p) => p.id === state.villageCaptainId)?.mutedForDay}
+          onConfirm={(setup) => {
+            setVoteDirection(setup.voteDirection);
+            setCaptainVotesFirst(setup.captainVotesFirst);
+            setVoteSetupDay(state.day);
+          }}
+        />
+      )}
+
+      {voteAnnounce && (
+        <VoteAnnounceCard
+          day={state.day}
+          onClose={() => setVoteAnnounce(false)}
+          onSkip={() => {
+            setVoteAnnounce(false);
+            updateState(skipVote(state));
+          }}
+          onProceed={() => {
+            setVoteAnnounce(false);
+            setDebateDoneDay(state.day);
+            if (preVoteActor(state, "geolier") || preVoteActor(state, "corbeau")) {
+              setPreVoteOpen(true);
+            } else {
+              updateState(goToVote(state));
+            }
+          }}
+        />
+      )}
+
+      {preVoteOpen && (
+        <PreVotePanel
+          state={state}
+          onDone={(next) => {
+            setPreVoteOpen(false);
+            updateState(goToVote(next));
+          }}
+        />
+      )}
+
+      {state.phase === "EVENEMENT_MORT" ? (
+        state.babyWolfPending?.length ? (
+          <BabyWolfPanel state={state} onDone={updateState} />
+        ) : (
+          <HunterPanel state={state} onDone={updateState} />
+        )
+      ) : state.captainSuccessionPending && !successionWaitsForReport ? (
+        <CaptainSuccessionPanel state={state} onDone={setState} />
+      ) : state.phase === "AUBE" ? (
+        <DawnPanel
+          state={state}
+          settings={settings}
+          direction={direction}
+          setupDone={directionDay === state.day}
+          debateDone={debateDoneDay === state.day}
+          onDebateDone={() => {
+            setDebateDoneDay(state.day);
+            setVoteAnnounce(true);
+          }}
+          onChange={updateState}
+          onRemovePenalty={removePenalty}
+          onUndo={undo}
+          canUndo={canUndo}
+          onProceedToVote={() => setVoteAnnounce(true)}
+        />
+      ) : state.phase === "JOUR_VOTE" ? (
+        voteSetupDay === state.day ? (
+          <VoteWheel
+            state={state}
+            direction={voteDirection}
+            captainVotesFirst={captainVotesFirst}
+            onVoteRecord={(r) => setVoteHistory((h) => [...h, r])}
+            onChange={(next) => {
+              if (next.lastEliminated?.length) setVictims(next.lastEliminated);
+              updateState(next);
+            }}
+            onUndo={undo}
+            canUndo={canUndo}
+            onPenalty={(id) => {
+              const p = state.players.find((x) => x.id === id);
+              if (p) {
+                updateState(addDebatePenalty(state, id));
+                toast.error(t("penaltyAddedToast", { name: p.name }));
+              }
+            }}
+            onRemovePenalty={removePenalty}
+          />
+        ) : null
+      ) : (
+        <NightPanel state={state} onChange={updateState} onUndo={undo} canUndo={canUndo} />
+      )}
+
+      {/* Bloc de notes privées pour le Meneur */}
+      <section className="surface-card rounded-2xl p-4">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xs font-bold tracking-widest text-primary uppercase">
+            {t("gmNotesTitle")}
+          </h2>
+          <button
+            onClick={() => setGmNotesOpen((v) => !v)}
+            className="text-xs text-muted-foreground hover:text-primary transition"
+          >
+            {gmNotesOpen ? t("gmNotesHide") : t("gmNotesShow")}
+          </button>
+        </div>
+        {gmNotesOpen && (
+          <textarea
+            value={gmNotesText}
+            onChange={(e) => setGmNotesText(e.target.value)}
+            placeholder={t("gmNotesPlaceholder")}
+            className="w-full h-24 rounded-xl border border-border bg-input/50 p-3 text-xs outline-none focus:ring-1 focus:ring-primary"
+          />
+        )}
+      </section>
+
+      {!(isNight && currentStep(state)) && (
+        <section className="surface-card rounded-2xl p-4">
+          <h2 className="mb-2 text-xs font-bold tracking-widest text-primary uppercase">
+            {t("village", { n: state.players.filter((p) => p.alive).length })}
+          </h2>
+          <RoleList players={state.players} revealAll />
+        </section>
+      )}
+    </main>
+  );
+}
+
+function Overlay({
+  children,
+  onClose,
+  tone = "NIGHT",
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+  tone?: "NIGHT" | "DAY" | "WOLF";
+}) {
+  const { t } = useI18n();
+  return (
+    <OverlayCard tone={tone}>
+      <p className="text-lg font-semibold">{children}</p>
+      <button
+        onClick={onClose}
+        className="w-full rounded-full bg-primary py-3 font-bold text-primary-foreground transition active:scale-95"
+      >
+        {t("continue")}
+      </button>
+    </OverlayCard>
+  );
+}
+
+function VoteAnnounceCard({
+  day,
+  onClose,
+  onSkip,
+  onProceed,
+}: {
+  day: number;
+  onClose: () => void;
+  onSkip: () => void;
+  onProceed: () => void;
+}) {
+  const { t } = useI18n();
+  const isFirstDay = day <= 1;
+  return (
+    <div className="fixed inset-0 z-50 flex w-screen max-w-full items-center justify-center overflow-x-hidden overflow-y-auto bg-black/85 p-4 backdrop-blur-md">
+      <div className="surface-card animate-claw-slash mx-auto box-border w-full max-w-sm shrink-0 space-y-5 rounded-3xl border-2 border-primary/40 p-6 text-center shadow-2xl sm:max-w-md">
+        <div className="flex items-center justify-center gap-2 text-primary">
+          <Swords className="size-6 animate-pulse" />
+          <h2 className="font-horror text-2xl font-black tracking-wide">
+            {t("voteAnnounceTitle")}
+          </h2>
+        </div>
+        <p className="text-sm text-muted-foreground leading-relaxed">{t("voteAnnounceDesc")}</p>
+        {!isFirstDay && (
+          <p className="text-[11px] tracking-widest text-amber-400 uppercase">
+            {t("voteAnnounceMandatory")}
+          </p>
+        )}
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={onProceed}
+            className="neon-ring w-full rounded-full bg-primary py-3 font-bold text-primary-foreground transition active:scale-95"
+          >
+            {t("voteAnnounceContinue")}
+          </button>
+          {isFirstDay && (
+            <button
+              onClick={onSkip}
+              className="w-full rounded-full border border-border py-2.5 text-xs font-semibold text-muted-foreground"
+            >
+              {t("skipVoteDay1Vote")}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SuicideModal({
+  state,
+  onClose,
+  onConfirm,
+}: {
+  state: GameState;
+  onClose: () => void;
+  onConfirm: (ids: string[]) => void;
+}) {
+  const { t } = useI18n();
+  const [sel, setSel] = useState<string[]>([]);
+  const alive = state.players.filter((p) => p.alive);
+  return (
+    <OverlayCard tone="WOLF" label={t("suicideTitle")}>
+      <p className="flex items-center justify-center gap-2 text-[11px] tracking-[0.3em] text-destructive uppercase">
+        <Skull className="size-4" />
+        {t("suicideTitle")}
+      </p>
+      <p className="text-xs text-muted-foreground">{t("suicideDesc")}</p>
+      <div className="text-start">
+        <PlayerPicker
+          players={alive}
+          selected={sel}
+          onToggle={(id) =>
+            setSel((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]))
+          }
+          accent="crimson"
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <button
+          disabled={sel.length === 0}
+          onClick={() => onConfirm(sel)}
+          className="w-full rounded-full bg-destructive py-3 text-sm font-bold text-destructive-foreground transition active:scale-95 disabled:opacity-40"
+        >
+          {t("suicideConfirm")}
+        </button>
+        <button
+          onClick={onClose}
+          className="w-full rounded-full border border-border py-2.5 text-sm font-semibold text-muted-foreground"
+        >
+          {t("cancel")}
+        </button>
+      </div>
+    </OverlayCard>
+  );
+}
+
+function GuideModal({ onClose }: { onClose: () => void }) {
+  const { t } = useI18n();
+  return (
+    <OverlayCard tone="NIGHT" label={t("guideTitle")}>
+      <div className="space-y-4 text-left max-h-[60vh] overflow-y-auto pr-1">
+        <h3 className="text-sm font-bold text-primary">{t("guideRulesTitle")}</h3>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          - <strong>{t("guideRulesNight").split(":")[0]}:</strong>{" "}
+          {t("guideRulesNight").split(":").slice(1).join(":").trim()}
+        </p>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          - <strong>{t("guideRulesDawn").split(":")[0]}:</strong>{" "}
+          {t("guideRulesDawn").split(":").slice(1).join(":").trim()}
+        </p>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          - <strong>{t("guideRulesVote").split(":")[0]}:</strong>{" "}
+          {t("guideRulesVote").split(":").slice(1).join(":").trim()}
+        </p>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          - <strong>{t("guideRulesUndo").split(":")[0]}:</strong>{" "}
+          {t("guideRulesUndo").split(":").slice(1).join(":").trim()}
+        </p>
+      </div>
+      <button
+        onClick={onClose}
+        className="mt-4 w-full rounded-full bg-primary py-3 font-bold text-primary-foreground"
+      >
+        {t("guideCloseBtn")}
+      </button>
+    </OverlayCard>
+  );
+}
+
+function RoleList({ players, revealAll }: { players: Player[]; revealAll?: boolean }) {
+  const { t, roleName } = useI18n();
+  return (
+    <ul className="grid grid-cols-2 gap-2 text-sm">
+      {players.map((p) => (
+        <li
+          key={p.id}
+          className={`rounded-xl border border-border px-3 py-2 ${p.alive ? "" : "opacity-40 line-through"}`}
+        >
+          <span className="flex items-center gap-1 font-semibold">
+            {p.name}
+            {p.isCaptain && p.alive && (
+              <Crown className="size-3.5 text-accent" aria-label={t("captain")} />
+            )}
+            {p.isConvertedToWolf && (
+              <span
+                title={t("convertedInfo")}
+                className="rounded bg-destructive/20 px-1 text-[9px] font-bold text-destructive uppercase"
+              >
+                {t("wolfTag")}
+              </span>
+            )}
+            {p.doused && p.alive && (
+              <span title={t("fuelStatus")} aria-label={t("fuelStatus")}>
+                🔥
+              </span>
+            )}
+            {p.frozenNight && p.alive && (
+              <span title={t("frozenStatus")} aria-label={t("frozenStatus")}>
+                ❄️
+              </span>
+            )}
+            {effectiveRoleId(p) === "alien" && p.alive && (
+              <span className="rounded bg-accent/20 px-1 text-[9px] font-bold text-accent">
+                {3 - (p.alienErrors ?? 0)}/3
+              </span>
+            )}
+            {(p.penaltyVotes ?? 0) > 0 && (
+              <span className="rounded bg-amber-500/20 px-1 text-[9px] font-bold text-amber-500">
+                +{p.penaltyVotes}
+              </span>
+            )}
+          </span>
+          {(revealAll || !p.alive) && (
+            <span className="block text-[11px] text-muted-foreground">
+              {roleName(p.originalRoleId ?? effectiveRoleId(p))}
+              {p.isConvertedToWolf && t("converted")}
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const PICKER_ACCENT = {
+  arcane: "border-primary bg-primary/15 text-primary shadow-[0_0_18px_rgba(99,102,241,0.45)]",
+  poison:
+    "border-emerald-400 bg-emerald-400/15 text-emerald-300 shadow-[0_0_18px_rgba(52,211,153,0.45)]",
+  crimson:
+    "border-destructive bg-destructive/15 text-destructive shadow-[0_0_18px_rgba(236,72,153,0.5)]",
+} as const;
+
+type PickerAccent = keyof typeof PICKER_ACCENT;
+
+function PlayerPicker({
+  players,
+  selected,
+  onToggle,
+  accent = "arcane",
+  marks,
+  disabledIds,
+}: {
+  players: Player[];
+  selected: string[];
+  onToggle: (id: string) => void;
+  accent?: PickerAccent;
+  marks?: Record<string, React.ReactNode>;
+  disabledIds?: string[];
+}) {
+  const { t, roleName } = useI18n();
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {players.map((p) => {
+        const rid = p.originalRoleId ?? effectiveRoleId(p);
+        const wolfSide = p.team === "WEREWOLVES" || p.isConvertedToWolf;
+        const solo = ROLE_BY_ID[rid]?.team === "SOLO";
+        const off = disabledIds?.includes(p.id) ?? false;
+        return (
+          <button
+            key={p.id}
+            disabled={off}
+            onClick={() => onToggle(p.id)}
+            className={`relative rounded-xl border px-3 py-3 text-sm transition duration-300 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 ${
+              selected.includes(p.id) && !off ? PICKER_ACCENT[accent] : "border-border"
+            }`}
+          >
+            {p.isCaptain && (
+              <span
+                aria-label={t("captain")}
+                className="absolute -top-2 -right-2 grid size-6 place-items-center rounded-full bg-accent text-accent-foreground shadow-lg"
+              >
+                <Crown className="size-3.5" />
+              </span>
+            )}
+            <span className="flex flex-wrap items-center justify-center gap-1 font-semibold">
+              {p.name}
+              {marks?.[p.id]}
+              {p.isConvertedToWolf && (
+                <span className="rounded bg-destructive/20 px-1 text-[9px] font-bold text-destructive uppercase">
+                  {t("wolfTag")}
+                </span>
+              )}
+              {p.doused && <span aria-label={t("fuelStatus")}>🔥</span>}
+              {p.frozenNight && <span aria-label={t("frozenStatus")}>❄️</span>}
+              {effectiveRoleId(p) === "alien" && (
+                <span className="rounded bg-accent/20 px-1 text-[9px] font-bold text-accent">
+                  {3 - (p.alienErrors ?? 0)}/3
+                </span>
+              )}
+              {(p.penaltyVotes ?? 0) > 0 && (
+                <span className="rounded bg-amber-500/20 px-1 text-[9px] font-bold text-amber-500">
+                  +{p.penaltyVotes}
+                </span>
+              )}
+            </span>
+            <span className="mt-0.5 flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
+              <span
+                className={`size-1.5 rounded-full ${wolfSide ? "bg-destructive" : solo ? "bg-accent" : "bg-primary"}`}
+              />
+              {roleName(rid)}
+              {p.isConvertedToWolf && t("converted")}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function NightPanel({
+  state,
+  onChange,
+  onUndo,
+  canUndo,
+}: {
+  state: GameState;
+  onChange: (s: GameState) => void;
+  onUndo?: () => void;
+  canUndo?: boolean;
+}) {
+  const { t, prompt, roleName, lang } = useI18n();
+  const narrate = useNarrate();
+  const step = currentStep(state);
+  const [sel, setSel] = useState<string[]>([]);
+  const [execute, setExecute] = useState(false);
+  const [heal, setHeal] = useState(false);
+  const [infect, setInfect] = useState(false);
+  const [mute, setMute] = useState<string | null>(null);
+  const [bwTab, setBwTab] = useState<"attack" | "infect" | "mute">("attack");
+  const [editingWord, setEditingWord] = useState(false);
+  const [shieldConfirm, setShieldConfirm] = useState(false);
+  const [wordDraft, setWordDraft] = useState("");
+  const [facePower, setFacePower] = useState<"protect" | "life" | "poison" | "inspect" | null>(
+    null,
+  );
+  const [spyChoice, setSpyChoice] = useState<boolean | null>(null);
+  const [ignite, setIgnite] = useState(false);
+  const [guessRole, setGuessRole] = useState("");
+
+  useEffect(() => {
+    setSel([]);
+    setExecute(false);
+    setHeal(false);
+    setInfect(false);
+    setMute(null);
+    setBwTab("attack");
+    setEditingWord(false);
+    setWordDraft("");
+    setShieldConfirm(false);
+    setFacePower(null);
+    setSpyChoice(null);
+    setIgnite(false);
+    setGuessRole("");
+  }, [step?.key]);
+
+  useEffect(() => {
+    if (!step) return undefined;
+    const WOLF_ROLES = [
+      "loup-garou",
+      "loup-noir",
+      "loup-blanc",
+      "loup-matriarche",
+      "loup-bavard",
+      "loup-rouge",
+      "bébé-loup",
+    ];
+    if (WOLF_ROLES.includes(step.roleId)) playWolfHowl();
+    if (step.mode === "wolves") {
+      const id = window.setTimeout(() => {
+        try {
+          speakRole(WOLF_CALL[lang] ?? WOLF_CALL.fr, SPEECH_LANG[lang] ?? "fr-FR");
+        } catch (e) {
+          console.error(e);
+        }
+      }, 1200);
+      return () => window.clearTimeout(id);
+    }
+    return undefined;
+  }, [step?.key]);
+
+  if (!step) {
+    return (
+      <NarratorCard text={t("nightEnds")}>
+        <button
+          onClick={() => onChange(submitStep(state, {}))}
+          className="w-full rounded-full bg-primary py-3 font-bold text-primary-foreground"
+        >
+          {t("raiseDay")}
+        </button>
+      </NarratorCard>
+    );
+  }
+
+  const actor = state.players.find((p) => p.id === step.actorId);
+  if (
+    !actor ||
+    !actor.alive ||
+    actor.powersDisabled ||
+    actor.hasLostPower ||
+    actor.frozenNight === state.night ||
+    actor.disabledNightAbility
+  ) {
+    return (
+      <NarratorCard
+        text={narrate("⟦nightPowerUnavailable⟧" + JSON.stringify({ name: actor?.name ?? "" }))}
+      >
+        <Button
+          type="button"
+          onClick={() => onChange(submitStep(state, {}))}
+          className="w-full rounded-full bg-primary py-3 font-bold text-primary-foreground"
+        >
+          {t("continue")}
+        </Button>
+      </NarratorCard>
+    );
+  }
+  let candidates = state.players.filter((p) => p.alive);
+  if (step.roleId === "loup-blanc")
+    candidates = step.soloKill
+      ? candidates.filter((p) => p.id !== actor.id)
+      : candidates.filter((p) => p.team === "WEREWOLVES" && p.id !== actor.id);
+
+  if (step.roleId === "salvateur") {
+    // Rotation cyclique : un joueur déjà protégé dans le cycle est indisponible,
+    // le Salvateur peut se protéger lui-même, et le cycle repart quand tout le
+    // monde a été protégé une fois.
+    const history = actor.protectedHistory ?? [];
+    const remaining = candidates.filter((p) => !history.includes(p.id));
+    if (remaining.length > 0) candidates = remaining;
+  }
+  if (
+    [
+      "voyante",
+      "cupidon",
+      "mime",
+      "enfant-sauvage",
+      "general",
+      "voleur",
+      "maniaque",
+      "loup-rouge",
+      "pyromaniac",
+      "alien",
+    ].includes(step.roleId)
+  )
+    candidates = candidates.filter((p) => p.id !== actor.id);
+
+  if (step.roleId === "pyromaniac") candidates = candidates.filter((p) => !p.doused);
+
+  const toggle = (id: string) =>
+    setSel((s) =>
+      s.includes(id)
+        ? s.filter((x) => x !== id)
+        : step.mode === "two"
+          ? [...s, id].slice(-2)
+          : [id],
+    );
+
+  const STANDARD_WOLF_KILLERS = ["loup-garou", "loup-noir", "loup-bavard", "loup-matriarche"];
+  const isNewWolfPack = step.mode === "wolves" && ["loup-rouge", "bébé-loup"].includes(step.roleId);
+  const forbiddenWolfIds =
+    (STANDARD_WOLF_KILLERS.includes(step.roleId) && step.roleId !== "loup-rouge") || isNewWolfPack
+      ? state.players.filter((p) => p.alive && p.team === "WEREWOLVES").map((p) => p.id)
+      : [];
+  const toggleTarget = (id: string) => {
+    if (forbiddenWolfIds.includes(id)) return;
+    toggle(id);
+  };
+
+  const send = (payload: Parameters<typeof submitStep>[1]) => onChange(submitStep(state, payload));
+
+  const matriarch = state.players.find(
+    (p) =>
+      p.alive &&
+      effectiveRoleId(p) === "loup-matriarche" &&
+      !p.disabledNightAbility &&
+      !p.powersDisabled &&
+      p.frozenNight !== state.night,
+  );
+
+  const attackedPlayerName = state.players.find((p) => p.id === state.round.attackedId)?.name;
+
+  const stepPrompt = isNewWolfPack
+    ? t("newWolfPackPrompt")
+    : step.roleId === "pyromaniac"
+      ? `${prompt(step.roleId)} ${t("pyroLimit", { n: step.mode === "two" ? 2 : 1 })}`
+      : prompt(step.roleId) || narrate(step.prompt);
+  const stepTitle = `${roleName(step.roleId)}${step.soloKill ? t("soloPackSuffix") : ""}`;
+  // Appel collectif de la meute : illustration de groupe + annonce rituelle.
+  const isPackCall = step.mode === "wolves";
+  const wolfCall = WOLF_CALL[lang] ?? WOLF_CALL.fr;
+
+  const renardVague: string[] = [];
+  if (step.mode === "renard") {
+    if (state.round.attackedId) {
+      renardVague.push(nk("renardVagueAttack"));
+    }
+    if (state.round.blackWolfConvert) {
+      renardVague.push(nk("renardVagueInfect"));
+    }
+    if (state.round.healed) {
+      renardVague.push(nk("renardVagueHeal"));
+    }
+    if (state.round.poisonedId) {
+      renardVague.push(nk("renardVaguePoison"));
+    }
+    if (state.round.facesPoisonedId) {
+      renardVague.push(nk("renardVaguePoison"));
+    }
+    if (state.round.seerCheckTargetId && state.round.seerCheckResultRole) {
+      renardVague.push(nk("renardVagueSeer"));
+    }
+    if (state.round.villageShield) {
+      renardVague.push(nk("renardVagueShield"));
+    } else if (state.round.protectedId) {
+      renardVague.push(nk("renardVagueProtect"));
+    }
+    if (state.round.maniacKillId) {
+      renardVague.push(nk("renardVagueManiac"));
+    }
+    if (state.round.mutedId) {
+      renardVague.push(nk("renardVagueSilence"));
+    }
+    if (renardVague.length === 0) renardVague.push(nk("renardVagueNothing"));
+  }
+
+  return (
+    <div className="surface-card animate-rise-in neon-ring overflow-hidden rounded-3xl">
+      <div className="relative aspect-[16/10] overflow-hidden">
+        <img
+          src={isPackCall ? "/images/wolf-pack.jpg" : roleImage(step.roleId)}
+          alt={t("stepWakeAlt", { role: stepTitle })}
+          width={640}
+          height={640}
+          loading="lazy"
+          className="animate-slow-zoom h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
+        <p className="absolute bottom-3 left-4 text-lg font-black text-primary">{stepTitle}</p>
+        <div className="absolute right-3 bottom-3 flex items-center gap-2">
+          <SpeakButton text={isPackCall ? wolfCall : stepTitle} />
+        </div>
+      </div>
+
+      {isPackCall && (
+        <div className="mx-5 mt-4 rounded-2xl border border-primary/40 bg-primary/10 p-3 text-center">
+          <p className="text-sm font-bold text-primary">🐺 {wolfCall}</p>
+        </div>
+      )}
+
+      <div className="space-y-4 p-5">
+        <div className="space-y-1 rounded-2xl border border-primary/30 bg-primary/5 p-3">
+          <p className="text-[10px] tracking-[0.25em] text-primary uppercase">
+            {t("gmTurnGuide", { role: roleName(step.roleId), name: actor.name })}
+          </p>
+          <p className="text-sm text-muted-foreground">{stepPrompt}</p>
+        </div>
+
+        {step.mode === "word" ? (
+          <div className="space-y-4">
+            {step.soloKill && (
+              <div className="space-y-2">
+                <p className="text-xs tracking-widest text-primary uppercase">
+                  {t("noirSoloVictimTitle")}
+                </p>
+                <PlayerPicker
+                  players={candidates.filter((p) => p.id !== actor.id)}
+                  selected={sel}
+                  onToggle={toggleTarget}
+                  disabledIds={forbiddenWolfIds}
+                />
+              </div>
+            )}
+
+            <div className="neon-ring relative overflow-hidden rounded-3xl border-2 border-primary bg-black/60 p-6 text-center">
+              <p className="text-[11px] tracking-[0.3em] text-primary uppercase">
+                {t("secretWordTitle")}
+              </p>
+              {editingWord ? (
+                <div className="mt-3 flex items-center gap-2">
+                  <input
+                    autoFocus
+                    value={wordDraft}
+                    onChange={(e) => setWordDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && wordDraft.trim()) {
+                        onChange({
+                          ...state,
+                          round: { ...state.round, requiredWord: wordDraft.trim() },
+                        });
+                        setEditingWord(false);
+                      }
+                      if (e.key === "Escape") setEditingWord(false);
+                    }}
+                    className="flex-1 rounded-2xl bg-input px-4 py-3 text-center text-3xl font-black outline-none focus:ring-2 focus:ring-primary"
+                    placeholder={t("newWordPlaceholder")}
+                  />
+                  <button
+                    onClick={() => {
+                      if (wordDraft.trim())
+                        onChange({
+                          ...state,
+                          round: { ...state.round, requiredWord: wordDraft.trim() },
+                        });
+                      setEditingWord(false);
+                    }}
+                    className="shrink-0 rounded-full bg-primary px-4 py-3 text-sm font-bold text-primary-foreground"
+                  >
+                    OK
+                  </button>
+                  <button
+                    onClick={() => setEditingWord(false)}
+                    className="shrink-0 rounded-full border border-border p-3 text-muted-foreground"
+                    aria-label={t("cancel")}
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-2 flex items-center justify-center gap-3">
+                  <span className="gradient-text text-6xl font-black leading-tight tracking-wider">
+                    {state.round.requiredWord}
+                  </span>
+                  <button
+                    onClick={() => {
+                      setWordDraft(state.round.requiredWord ?? "");
+                      setEditingWord(true);
+                    }}
+                    aria-label={t("editWord")}
+                    className="shrink-0 rounded-full border border-primary/40 p-2 text-primary/60 transition hover:border-primary hover:text-primary"
+                  >
+                    <Pencil className="size-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+            <button
+              disabled={step.soloKill && sel.length !== 1}
+              onClick={() => send(step.soloKill ? { targetId: sel[0] } : {})}
+              className="neon-ring w-full rounded-full bg-primary py-3 font-bold text-primary-foreground disabled:opacity-40"
+            >
+              {t("bavardSeen")}
+            </button>
+          </div>
+        ) : step.mode === "alien" ? (
+          <div className="space-y-3">
+            <p className="text-xs font-bold text-accent">
+              {t("alienCharges", { n: 3 - (actor.alienErrors ?? 0) })}
+            </p>
+            <PlayerPicker players={candidates} selected={sel} onToggle={toggle} accent="arcane" />
+            <label className="block space-y-1 text-xs font-semibold text-muted-foreground">
+              {t("alienGuessRole")}
+              <select
+                value={guessRole}
+                onChange={(e) => setGuessRole(e.target.value)}
+                className="w-full rounded-xl border border-border bg-input px-3 py-3 text-sm text-foreground"
+              >
+                <option value="">—</option>
+                {ROLES.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {roleName(r.id)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="flex gap-2">
+              <Button
+                disabled={sel.length !== 1 || !guessRole}
+                onClick={() => {
+                  send({ targetId: sel[0], guessedRoleId: guessRole });
+                  setSel([]);
+                  setGuessRole("");
+                }}
+                className="flex-1 rounded-full bg-primary py-3 font-bold text-primary-foreground disabled:opacity-40"
+              >
+                {t("validate")}
+              </Button>
+              <Button
+                onClick={() => send({})}
+                className="flex-1 rounded-full border border-border py-3 text-sm font-semibold text-muted-foreground"
+              >
+                {t("pass")}
+              </Button>
+            </div>
+          </div>
+        ) : step.mode === "wolves" ? (
+          <div className="space-y-3">
+            <PlayerPicker
+              players={candidates}
+              selected={sel}
+              onToggle={toggleTarget}
+              disabledIds={forbiddenWolfIds}
+            />
+            <button
+              disabled={sel.length !== 1}
+              onClick={() => send({ targetId: sel[0] })}
+              className="w-full rounded-full bg-primary py-3 font-bold text-primary-foreground disabled:opacity-40"
+            >
+              {t("packAgrees")}
+            </button>
+            {matriarch && (
+              <button
+                onClick={() => send({ disagreement: true })}
+                className="w-full rounded-full border border-primary py-3 text-sm font-bold text-primary"
+              >
+                {t("disagreement")}
+              </button>
+            )}
+          </div>
+        ) : step.mode === "blackwolf" ? (
+          (() => {
+            const victimId = step.soloKill ? sel[0] : state.round.attackedId;
+            const victim = state.players.find((p) => p.id === victimId);
+            const infectLocked = !!actor.abilityUsed;
+            const muteLocked = state.night < 2;
+            const tab =
+              bwTab === "attack" && !step.soloKill ? (infectLocked ? "mute" : "infect") : bwTab;
+            const marks: Record<string, React.ReactNode> = {};
+            if (victimId)
+              marks[victimId] = infect ? (
+                <Droplet className="size-3.5 text-emerald-400" />
+              ) : (
+                <Swords className="size-3.5 text-destructive" />
+              );
+            if (mute)
+              marks[mute] = (
+                <span className="flex items-center gap-1">
+                  {marks[mute]}
+                  <MicOff className="size-3.5 text-amber-400" />
+                </span>
+              );
+            const TABS = [
+              {
+                key: "attack" as const,
+                label: t("bwTabAttack"),
+                icon: Swords,
+                locked: !step.soloKill,
+              },
+              {
+                key: "infect" as const,
+                label: t("bwTabInfect"),
+                icon: Droplet,
+                locked: infectLocked,
+              },
+              {
+                key: "mute" as const,
+                label: t("bwTabMute"),
+                icon: MicOff,
+                locked: muteLocked,
+              },
+            ];
+            return (
+              <div className="space-y-3">
+                <p className="text-xs tracking-widest text-destructive uppercase">
+                  {t("bwHubTitle")}
+                </p>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {TABS.map((tb) => (
+                    <button
+                      key={tb.key}
+                      disabled={tb.locked}
+                      onClick={() => setBwTab(tb.key)}
+                      className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-2 text-[11px] font-bold transition active:scale-95 disabled:opacity-30 ${
+                        tab === tb.key && !tb.locked
+                          ? "border-destructive bg-destructive/15 text-destructive shadow-[0_0_18px_rgba(236,72,153,0.4)]"
+                          : "border-border text-muted-foreground"
+                      }`}
+                    >
+                      <tb.icon className="size-4" />
+                      {tb.label}
+                    </button>
+                  ))}
+                </div>
+
+                <p className="text-[11px] text-muted-foreground">
+                  {tab === "attack"
+                    ? t("bwPickAttack")
+                    : tab === "infect"
+                      ? t("bwPickInfect")
+                      : t("bwPickMute")}
+                </p>
+
+                {tab === "infect" && (
+                  <p
+                    className={`text-[11px] font-bold uppercase ${infectLocked ? "text-muted-foreground" : "text-destructive"}`}
+                  >
+                    {infectLocked ? t("bwInfectUsed") : t("bwInfectAvailable")}
+                  </p>
+                )}
+
+                {tab === "attack" && (
+                  <PlayerPicker
+                    players={candidates.filter((p) => p.id !== actor.id)}
+                    selected={sel}
+                    onToggle={(id) => {
+                      setInfect(false);
+                      toggleTarget(id);
+                    }}
+                    disabledIds={forbiddenWolfIds}
+                    accent="crimson"
+                    marks={marks}
+                  />
+                )}
+
+                {tab === "infect" &&
+                  (step.soloKill ? (
+                    <PlayerPicker
+                      players={candidates.filter((p) => p.id !== actor.id)}
+                      selected={infect && sel[0] ? [sel[0]] : []}
+                      disabledIds={forbiddenWolfIds}
+                      onToggle={(id) => {
+                        if (forbiddenWolfIds.includes(id)) return;
+                        if (infect && sel[0] === id) {
+                          setInfect(false);
+                          setSel([]);
+                          return;
+                        }
+                        setSel([id]);
+                        setInfect(true);
+                      }}
+                      accent="crimson"
+                      marks={marks}
+                    />
+                  ) : victim ? (
+                    <button
+                      onClick={() => setInfect((v) => !v)}
+                      className={`flex w-full items-center justify-center gap-2 rounded-xl border p-4 text-sm font-bold transition ${
+                        infect
+                          ? "border-emerald-400 bg-emerald-400/20 text-emerald-300 shadow-[0_0_18px_rgba(52,211,153,0.45)]"
+                          : "border-border text-foreground"
+                      }`}
+                    >
+                      <Droplet className="size-4" />
+                      {infect
+                        ? t("bwInfectingTarget", { name: victim.name })
+                        : t("bwInfectPrompt", { name: victim.name })}
+                    </button>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">{t("bwNoVictimToInfect")}</p>
+                  ))}
+
+                {tab === "mute" && (
+                  <PlayerPicker
+                    players={candidates}
+                    selected={mute ? [mute] : []}
+                    onToggle={(id) => setMute((cur) => (cur === id ? null : id))}
+                    disabledIds={state.round.previousMutedId ? [state.round.previousMutedId] : []}
+                    accent="arcane"
+                    marks={marks}
+                  />
+                )}
+
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={() =>
+                      send({
+                        targetId: sel[0],
+                        yes: infect,
+                        muteId: mute ?? undefined,
+                      })
+                    }
+                    className="w-full rounded-full bg-primary py-3 font-bold text-primary-foreground"
+                  >
+                    {t("validate")}
+                  </button>
+                  {step.optional && (
+                    <button
+                      onClick={() => send({})}
+                      className="w-full rounded-full border border-border py-3 text-sm font-semibold text-muted-foreground"
+                    >
+                      {t("pass")}
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })()
+        ) : step.mode === "threefaces" ? (
+          <div className="space-y-3">
+            <p className="text-xs tracking-widest text-primary uppercase">
+              {t("facesChoosePower")}
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                disabled={actor.facesUsed?.includes("protect")}
+                onClick={() => setFacePower("protect")}
+                className={`flex flex-col items-center gap-1 rounded-xl border p-2 text-xs font-bold ${
+                  facePower === "protect"
+                    ? "border-primary bg-primary/20 text-primary"
+                    : "border-border"
+                } disabled:opacity-30`}
+              >
+                <Shield className="size-4" />
+                {t("facesProtect")}
+              </button>
+              <button
+                disabled={actor.facesUsed?.includes("potion")}
+                onClick={() => setFacePower("life")}
+                className={`flex flex-col items-center gap-1 rounded-xl border p-2 text-xs font-bold ${
+                  facePower === "life" || facePower === "poison"
+                    ? "border-emerald-400 bg-emerald-400/20 text-emerald-300"
+                    : "border-border"
+                } disabled:opacity-30`}
+              >
+                <Sparkles className="size-4" />
+                {t("facesPotion")}
+              </button>
+              <button
+                disabled={actor.facesUsed?.includes("inspect")}
+                onClick={() => setFacePower("inspect")}
+                className={`flex flex-col items-center gap-1 rounded-xl border p-2 text-xs font-bold ${
+                  facePower === "inspect"
+                    ? "border-amber-400 bg-amber-400/20 text-amber-300"
+                    : "border-border"
+                } disabled:opacity-30`}
+              >
+                <Eye className="size-4" />
+                {t("facesInspect")}
+              </button>
+            </div>
+
+            {facePower === "protect" && (
+              <PlayerPicker
+                players={candidates}
+                selected={sel}
+                onToggle={toggleTarget}
+                accent="arcane"
+              />
+            )}
+            {facePower === "inspect" && (
+              <PlayerPicker
+                players={candidates.filter((p) => p.id !== actor.id)}
+                selected={sel}
+                onToggle={toggleTarget}
+                accent="arcane"
+              />
+            )}
+            {facePower === "life" && (
+              <div className="space-y-2">
+                <button
+                  onClick={() => send({ facePower: "life" })}
+                  disabled={!canWitchHeal(state)}
+                  className="w-full rounded-full bg-emerald-500 py-3 font-bold text-black disabled:opacity-40"
+                >
+                  {attackedPlayerName
+                    ? t("facesHealVictim", { name: attackedPlayerName })
+                    : t("facesNoVictimToHeal")}
+                </button>
+                <button
+                  onClick={() => setFacePower("poison")}
+                  className="w-full rounded-full border border-destructive py-2.5 text-xs font-bold text-destructive"
+                >
+                  {t("facesSwitchPoison")}
+                </button>
+              </div>
+            )}
+            {facePower === "poison" && (
+              <PlayerPicker
+                players={candidates.filter((p) => p.id !== actor.id)}
+                selected={sel}
+                onToggle={toggleTarget}
+                accent="poison"
+              />
+            )}
+
+            {(facePower === "protect" || facePower === "inspect" || facePower === "poison") && (
+              <button
+                disabled={sel.length !== 1}
+                onClick={() => send({ facePower, targetId: sel[0] })}
+                className="w-full rounded-full bg-primary py-3 font-bold text-primary-foreground disabled:opacity-40"
+              >
+                {t("validate")}
+              </button>
+            )}
+
+            {step.optional && (
+              <button
+                onClick={() => send({})}
+                className="w-full rounded-full border border-border py-2 text-xs font-semibold text-muted-foreground"
+              >
+                {t("pass")}
+              </button>
+            )}
+          </div>
+        ) : step.mode === "witch" ? (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <p className="text-xs tracking-widest text-primary uppercase">
+                {t("witchLifePotion")}
+              </p>
+              {actor.hasUsedLifePotion || actor.healUsed ? (
+                <p className="text-xs text-muted-foreground">{t("witchLifeUsed")}</p>
+              ) : attackedPlayerName && canWitchHeal(state) ? (
+                <button
+                  onClick={() => setHeal((v) => !v)}
+                  className={`w-full rounded-2xl border p-4 text-sm font-bold transition ${
+                    heal
+                      ? "border-emerald-400 bg-emerald-400/20 text-emerald-300"
+                      : "border-border text-foreground"
+                  }`}
+                >
+                  {heal
+                    ? t("witchSavingVictim", { name: attackedPlayerName })
+                    : t("witchSaveVictimPrompt", { name: attackedPlayerName })}
+                </button>
+              ) : (
+                <p className="text-xs text-muted-foreground">{t("nobodyAttacked")}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs tracking-widest text-destructive uppercase">
+                {t("witchDeathPotion")}
+              </p>
+              {actor.hasUsedDeathPotion || actor.poisonUsed ? (
+                <p className="text-xs text-muted-foreground">{t("witchDeathUsed")}</p>
+              ) : (
+                <PlayerPicker
+                  players={candidates.filter((p) => p.id !== actor.id)}
+                  selected={sel}
+                  onToggle={toggleTarget}
+                  accent="poison"
+                />
+              )}
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => send({ healUsed: heal, poisonId: sel[0] })}
+                className="w-full rounded-full bg-primary py-3 font-bold text-primary-foreground"
+              >
+                {t("validate")}
+              </button>
+              {step.optional && (
+                <button
+                  onClick={() => send({})}
+                  className="w-full rounded-full border border-border py-3 text-sm font-semibold text-muted-foreground"
+                >
+                  {t("pass")}
+                </button>
+              )}
+            </div>
+          </div>
+        ) : step.mode === "bear" ? (
+          <div className="space-y-4 text-center">
+            {(() => {
+              const { left, right } = bearNeighbors(state, actor.id);
+              const growls = state.round.bearGrowls ?? false;
+              return (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-around rounded-2xl border border-primary/20 bg-card p-4">
+                    <div>
+                      <p className="text-[10px] text-muted-foreground">{t("bearLeftNeighbor")}</p>
+                      <p className="text-sm font-bold">{left?.name ?? "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground">{t("bearRightNeighbor")}</p>
+                      <p className="text-sm font-bold">{right?.name ?? "—"}</p>
+                    </div>
+                  </div>
+                  <div
+                    className={`rounded-2xl border p-4 font-black text-lg ${
+                      growls
+                        ? "border-destructive bg-destructive/10 text-destructive animate-pulse"
+                        : "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                    }`}
+                  >
+                    {growls ? t("bearStatusGrowling") : t("bearStatusCalm")}
+                  </div>
+                </div>
+              );
+            })()}
+            <button
+              onClick={() => send({})}
+              className="w-full rounded-full bg-primary py-3 font-bold text-primary-foreground"
+            >
+              {t("continue")}
+            </button>
+          </div>
+        ) : step.mode === "yesno" ? (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setSpyChoice(true)}
+                className={`rounded-2xl border p-4 text-sm font-bold transition ${
+                  spyChoice === true
+                    ? "border-primary bg-primary/20 text-primary"
+                    : "border-border text-foreground"
+                }`}
+              >
+                {t("petiteFillePeek")}
+              </button>
+              <button
+                onClick={() => setSpyChoice(false)}
+                className={`rounded-2xl border p-4 text-sm font-bold transition ${
+                  spyChoice === false
+                    ? "border-primary bg-primary/20 text-primary"
+                    : "border-border text-foreground"
+                }`}
+              >
+                {t("petiteFilleSleep")}
+              </button>
+            </div>
+            <button
+              disabled={spyChoice === null}
+              onClick={() => send({ yes: spyChoice ?? false })}
+              className="w-full rounded-full bg-primary py-3 font-bold text-primary-foreground disabled:opacity-40"
+            >
+              {t("validate")}
+            </button>
+          </div>
+        ) : step.mode === "renard" ? (
+          <div className="space-y-3">
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 text-center">
+              <p className="text-[11px] tracking-[0.3em] text-amber-400 uppercase">
+                🦊 {t("renardReportTitle")}
+              </p>
+              <ul className="mt-3 space-y-2">
+                {renardVague.map((v, i) => (
+                  <li key={i} className="text-sm text-muted-foreground leading-relaxed">
+                    {narrate(v)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {!step.optional && (
+              <p className="text-xs tracking-widest text-amber-400 uppercase">
+                {t("renardFinalNight")}
+              </p>
+            )}
+            <p className="text-sm text-muted-foreground">{t("renardChooseConfidant")}</p>
+            <PlayerPicker
+              players={candidates.filter((p) => p.id !== actor.id)}
+              selected={sel}
+              onToggle={toggle}
+              accent="arcane"
+            />
+            <div className="flex gap-2">
+              <button
+                disabled={sel.length !== 1}
+                onClick={() => send({ targetId: sel[0] })}
+                className="flex-1 rounded-full bg-primary py-3 font-bold text-primary-foreground disabled:opacity-40"
+              >
+                {t("validate")}
+              </button>
+              {step.optional && (
+                <button
+                  onClick={() => send({})}
+                  className="flex-1 rounded-full border border-border py-3 text-sm font-semibold text-muted-foreground"
+                >
+                  {t("pass")}
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {step.roleId === "salvateur" && !actor.ultimateShieldUsed && (
+              <button
+                onClick={() => setShieldConfirm((v) => !v)}
+                className={`w-full rounded-2xl border p-3 text-xs font-bold transition ${
+                  shieldConfirm
+                    ? "border-accent bg-accent/20 text-accent"
+                    : "border-border text-muted-foreground"
+                }`}
+              >
+                <Shield className="inline size-4 mr-1" />
+                {t("ultimateShieldToggle")}
+              </button>
+            )}
+
+            {step.roleId === "pyromaniac" && (
+              <Button
+                disabled={!!actor.matchUsed}
+                onClick={() => {
+                  setIgnite((v) => !v);
+                  setSel([]);
+                }}
+                className={`w-full rounded-2xl border p-3 text-xs font-bold transition disabled:opacity-40 ${ignite ? "border-destructive bg-destructive/20 text-destructive" : "border-border text-muted-foreground"}`}
+              >
+                <Flame className="mr-1 inline size-4" />
+                {actor.matchUsed ? t("pyroMatchUsed") : t("pyroIgnite")}
+              </Button>
+            )}
+
+            {!shieldConfirm && !ignite && (
+              <PlayerPicker
+                players={candidates}
+                selected={sel}
+                onToggle={toggleTarget}
+                disabledIds={forbiddenWolfIds}
+                accent={step.roleId === "maniaque" ? "crimson" : "arcane"}
+              />
+            )}
+
+            <div className="flex gap-2 pt-2">
+              <button
+                disabled={
+                  !shieldConfirm &&
+                  !ignite &&
+                  (step.roleId === "pyromaniac"
+                    ? sel.length < 1 || sel.length > (step.mode === "two" ? 2 : 1)
+                    : sel.length !== (step.mode === "two" ? 2 : 1))
+                }
+                onClick={() =>
+                  send(
+                    shieldConfirm
+                      ? { ultimateShield: true }
+                      : ignite
+                        ? { ignite: true }
+                        : { targetId: sel[0], targetIds: sel },
+                  )
+                }
+                className="w-full rounded-full bg-primary py-3 font-bold text-primary-foreground disabled:opacity-40"
+              >
+                {t("validate")}
+              </button>
+              {step.optional && (
+                <button
+                  onClick={() => send({})}
+                  className="w-full rounded-full border border-border py-3 text-sm font-semibold text-muted-foreground"
+                >
+                  {t("pass")}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function HunterPanel({ state, onDone }: { state: GameState; onDone: (s: GameState) => void }) {
+  const { t } = useI18n();
+  const [targetId, setTargetId] = useState<string | null>(null);
+  const hunter = state.players.find((p) => p.id === state.hunterPending);
+  const aliveCandidates = state.players.filter((p) => p.alive);
+
+  return (
+    <div className="surface-card animate-rise-in neon-ring space-y-4 rounded-3xl p-5">
+      <div className="flex items-center gap-3 text-destructive">
+        <Flame className="size-6 animate-pulse" />
+        <h2 className="text-lg font-black uppercase">{t("hunterShotTitle")}</h2>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        {t("hunterShotDesc", { name: hunter?.name ?? "Le Chasseur" })}
+      </p>
+
+      <PlayerPicker
+        players={aliveCandidates}
+        selected={targetId ? [targetId] : []}
+        onToggle={(id) => setTargetId(id)}
+        accent="crimson"
+      />
+
+      <button
+        disabled={!targetId}
+        onClick={() => targetId && onDone(resolveHunter(state, targetId))}
+        className="w-full rounded-full bg-destructive py-3 font-bold text-destructive-foreground transition active:scale-95 disabled:opacity-40"
+      >
+        {t("hunterFireConfirm")}
+      </button>
+    </div>
+  );
+}
+
+const SPEECH_LANG: Record<string, string> = {
+  fr: "fr-FR", en: "en-US", ar: "ar-SA", es: "es-ES", pt: "pt-PT", ru: "ru-RU", zh: "zh-CN", de: "de-DE",
+};
+
+const WOLF_CALL: Record<string, string> = {
+  fr: "Les Loups-Garous se réveillent, se reconnaissent en silence et désignent ensemble leur victime !",
+  en: "Werewolves, awaken, recognise each other in silence and choose your victim together!",
+  ar: "تستيقظ الذئاب، تتعرف على بعضها في صمت وتختار ضحيتها معاً!",
+  es: "¡Los Hombres Lobo despiertan, se reconocen en silencio y eligen juntos a su víctima!",
+  pt: "Os Lobisomens despertam, reconhecem-se em silêncio e escolhem juntos a sua vítima!",
+  ru: "Оборотни просыпаются, молча узнают друг друга и вместе выбирают жертву!",
+  zh: "狼人们醒来，默默相认，一起选择今晚的猎物！",
+  de: "Die Werwölfe erwachen, erkennen sich schweigend und wählen gemeinsam ihr Opfer!",
+};
+
+const PRE_VOTE_TEXT: Record<string, Record<string, string>> = {
+  fr: { title: "Avant le vote", jail: "Geôlier : qui prives-tu de vote ?", raven: "Corbeau : désigne {n} joueur(s) (tu peux répartir tes voix)", skip: "Passer", confirm: "Valider et voter" },
+  en: { title: "Before the vote", jail: "Jailor: who loses their vote?", raven: "Raven: pick {n} player(s) (you may split your votes)", skip: "Skip", confirm: "Confirm and vote" },
+  ar: { title: "قبل التصويت", jail: "السجّان: من تحرمه من التصويت؟", raven: "الغراب: اختر {n} لاعب/لاعبين (يمكنك تقسيم أصواتك)", skip: "تخطي", confirm: "تأكيد والتصويت" },
+  es: { title: "Antes del voto", jail: "Carcelero: ¿quién pierde su voto?", raven: "Cuervo: elige {n} jugador(es) (puedes repartir tus votos)", skip: "Saltar", confirm: "Confirmar y votar" },
+  pt: { title: "Antes da votação", jail: "Carcereiro: quem perde o voto?", raven: "Corvo: escolha {n} jogador(es) (pode dividir seus votos)", skip: "Pular", confirm: "Confirmar e votar" },
+  ru: { title: "Перед голосованием", jail: "Тюремщик: кто лишается голоса?", raven: "Ворон: выберите {n} игрока(ов) (можно разделить голоса)", skip: "Пропустить", confirm: "Подтвердить и голосовать" },
+  zh: { title: "投票之前", jail: "狱卒：谁失去投票权？", raven: "乌鸦：选择 {n} 名玩家（可分配票数）", skip: "跳过", confirm: "确认并投票" },
+  de: { title: "Vor der Abstimmung", jail: "Kerkermeister: Wer verliert seine Stimme?", raven: "Rabe: wähle {n} Spieler (du kannst deine Stimmen aufteilen)", skip: "Überspringen", confirm: "Bestätigen und abstimmen" },
+};
+
+function PreVotePanel({ state, onDone }: { state: GameState; onDone: (s: GameState) => void }) {
+  const { lang } = useI18n();
+  const tx = PRE_VOTE_TEXT[lang] ?? PRE_VOTE_TEXT.fr;
+  const jailor = preVoteActor(state, "geolier");
+  const raven = preVoteActor(state, "corbeau");
+  const ravenMax = ravenVoteCount(state);
+  const [jailId, setJailId] = useState<string | null>(null);
+  const [ravenIds, setRavenIds] = useState<string[]>([]);
+  const alive = state.players.filter((p) => p.alive);
+  const toggleRaven = (id: string) =>
+    setRavenIds((cur) =>
+      cur.includes(id)
+        ? cur.filter((x) => x !== id)
+        : ravenMax === 1
+          ? [id]
+          : cur.length < ravenMax
+            ? [...cur, id]
+            : [cur[1], id],
+    );
+  const confirm = () => {
+    let next = state;
+    if (jailor && jailId) next = applyJailor(next, jailId);
+    if (raven && ravenIds.length) next = applyRaven(next, ravenIds);
+    onDone(next);
+  };
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/90 p-4">
+      <div className="surface-card neon-ring mx-auto w-full max-w-md space-y-5 rounded-3xl p-5">
+        <h2 className="text-center font-horror text-2xl font-black text-primary">{tx.title}</h2>
+        {jailor && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <img src={roleImage("geolier")} alt="" className="size-9 rounded-xl object-cover" />
+              <p className="text-sm font-bold">{tx.jail}</p>
+            </div>
+            <PlayerPicker
+              players={alive.filter((p) => p.id !== state.round.previousJailedId)}
+              selected={jailId ? [jailId] : []}
+              onToggle={(id) => setJailId((c) => (c === id ? null : id))}
+              accent="arcane"
+            />
+          </div>
+        )}
+        {raven && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <img src={roleImage("corbeau")} alt="" className="size-9 rounded-xl object-cover" />
+              <p className="text-sm font-bold">{tx.raven.replace("{n}", String(ravenMax))}</p>
+            </div>
+            <PlayerPicker
+              players={alive}
+              selected={ravenIds}
+              onToggle={toggleRaven}
+              accent="crimson"
+            />
+          </div>
+        )}
+        <div className="flex gap-2">
+          <button
+            onClick={() => onDone(state)}
+            className="flex-1 rounded-full border border-border py-3 text-xs font-semibold text-muted-foreground"
+          >
+            {tx.skip}
+          </button>
+          <button
+            onClick={confirm}
+            className="flex-1 rounded-full bg-primary py-3 font-bold text-primary-foreground transition active:scale-95"
+          >
+            {tx.confirm}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BabyWolfPanel({ state, onDone }: { state: GameState; onDone: (s: GameState) => void }) {
+  const { t } = useI18n();
+  const [targetId, setTargetId] = useState<string | null>(null);
+  const wolf = state.players.find((p) => p.id === state.babyWolfPending?.[0]);
+  return (
+    <div className="surface-card animate-rise-in neon-ring space-y-4 rounded-3xl p-5">
+      <div className="flex items-center gap-3 text-destructive">
+        <img src={roleImage("bébé-loup")} alt="" className="size-10 rounded-xl object-cover" />
+        <h2 className="text-lg font-black uppercase">{t("babyRevengeTitle")}</h2>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        {t("babyRevengeDesc", { name: wolf?.name ?? "" })}
+      </p>
+      <PlayerPicker
+        players={state.players.filter((p) => p.alive)}
+        selected={targetId ? [targetId] : []}
+        onToggle={setTargetId}
+        accent="crimson"
+      />
+      <Button
+        disabled={!targetId}
+        onClick={() => targetId && onDone(resolveBabyWolf(state, targetId))}
+        className="w-full rounded-full bg-destructive py-3 font-bold text-destructive-foreground disabled:opacity-40"
+      >
+        {t("babyRevengeConfirm")}
+      </Button>
+    </div>
+  );
+}
+
+function CaptainSuccessionPanel({
+  state,
+  onDone,
+}: {
+  state: GameState;
+  onDone: (s: GameState) => void;
+}) {
+  const { t } = useI18n();
+  const [targetId, setTargetId] = useState<string | null>(null);
+  const formerCaptain = state.players.find((p) => p.id === state.captainSuccessionPending);
+  const aliveCandidates = state.players.filter((p) => p.alive);
+
+  return (
+    <div className="surface-card animate-rise-in neon-ring space-y-4 rounded-3xl p-5">
+      <div className="flex items-center gap-3 text-amber-400">
+        <Crown className="size-6 animate-bounce" />
+        <h2 className="text-lg font-black uppercase">{t("captainSuccessionTitle")}</h2>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        {t("captainSuccessionDesc", { name: formerCaptain?.name ?? "Le Capitaine" })}
+      </p>
+
+      <PlayerPicker
+        players={aliveCandidates}
+        selected={targetId ? [targetId] : []}
+        onToggle={(id) => setTargetId(id)}
+        accent="arcane"
+      />
+
+      <button
+        disabled={!targetId}
+        onClick={() => targetId && onDone(assignCaptain(state, targetId))}
+        className="w-full rounded-full bg-primary py-3 font-bold text-primary-foreground transition active:scale-95 disabled:opacity-40"
+      >
+        {t("assignCaptainConfirm")}
+      </button>
+    </div>
+  );
+}
+
+function DawnPanel({
+  state,
+  settings,
+  direction,
+  setupDone,
+  debateDone,
+  onDebateDone,
+  onChange,
+  onRemovePenalty,
+  onUndo,
+  canUndo,
+  onProceedToVote,
+}: {
+  state: GameState;
+  settings: GameSettings | null;
+  direction: RotationDirection;
+  setupDone: boolean;
+  debateDone: boolean;
+  onDebateDone: () => void;
+  onChange: (s: GameState) => void;
+  onRemovePenalty: (id: string) => void;
+  onUndo?: () => void;
+  canUndo?: boolean;
+  onProceedToVote: () => void;
+}) {
+  const { t } = useI18n();
+
+  const mutedNames = state.players.filter((p) => p.alive && p.mutedForDay).map((p) => p.name);
+  const jailedPlayer = state.round.jailedId
+    ? state.players.find((p) => p.id === state.round.jailedId)
+    : null;
+
+  return (
+    <div className="space-y-4">
+      {setupDone && (
+        <div className="space-y-4">
+          <DebateWheel
+            seating={state.players.filter((p) => p.alive)}
+            seconds={settings?.debateTimePerPlayer ?? 60}
+            armed
+            direction={direction}
+            captainId={state.villageCaptainId}
+            day={state.day}
+            onFinish={onDebateDone}
+            onStar={(playerId, delta) =>
+              onChange({
+                ...state,
+                players: state.players.map((p) =>
+                  p.id === playerId ? { ...p, stars: Math.max(0, p.stars + delta) } : p,
+                ),
+              })
+            }
+            onPenalty={(playerId) => onChange(addDebatePenalty(state, playerId))}
+            onRemovePenalty={onRemovePenalty}
+          />
+          {(mutedNames.length > 0 || jailedPlayer) && (
+            <div className="flex flex-wrap items-center gap-2 text-[11px]">
+              {mutedNames.length > 0 && (
+                <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 font-semibold text-amber-400">
+                  🤐 {t("gmStatusMuted", { names: mutedNames.join(", ") })}
+                </span>
+              )}
+              {jailedPlayer && (
+                <span className="rounded-full border border-blue-500/40 bg-blue-500/10 px-2.5 py-1 font-semibold text-blue-400">
+                  🔒 {t("gmStatusJailed", { name: jailedPlayer.name })}
+                </span>
+              )}
+            </div>
+          )}
+          {(() => {
+            const fox = state.players.find((p) => p.alive && effectiveRoleId(p) === "renard");
+            const confidant = fox?.confidantId
+              ? state.players.find((p) => p.id === fox.confidantId && p.alive)
+              : undefined;
+            if (!fox || !fox.confidantId || !confidant) return null;
+            return (
+              <div className="flex flex-col gap-2 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-3">
+                <p className="text-[10px] tracking-widest text-amber-400 uppercase">
+                  {t("foxReveal")} / {t("confidantReveal")}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      onChange(foxReveal(state, fox.id));
+                      toast.error(
+                        t("foxRevealDoneToast", { name: fox.name, confidant: confidant.name }),
+                      );
+                    }}
+                    className="flex-1 rounded-full border border-amber-500/60 py-2.5 text-xs font-bold text-amber-400 transition active:scale-95"
+                  >
+                    {t("foxReveal")}
+                  </button>
+                  <button
+                    onClick={() => {
+                      onChange(confidantReveal(state, confidant.id));
+                      toast.error(
+                        t("confidantRevealDoneToast", { name: confidant.name, fox: fox.name }),
+                      );
+                    }}
+                    className="flex-1 rounded-full border border-amber-500/60 py-2.5 text-xs font-bold text-amber-400 transition active:scale-95"
+                  >
+                    {t("confidantReveal")}
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+    </div>
+  );
+}

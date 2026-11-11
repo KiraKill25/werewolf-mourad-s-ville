@@ -1,0 +1,613 @@
+import { NEW_ROLE_LOCALES } from "./new-roles";
+/** Russian dictionary — translated from source of truth. */
+export const ru = {
+  ui: {
+    ...NEW_ROLE_LOCALES.ru.ui,
+    seatingTitle: "Расположение игроков",
+    seatingHint:
+      "Перетащите игрока на другого, чтобы поменять их местами. Порядок в кругу определяет соседей.",
+    seatingTable: "Стол",
+    seatingCount: "{n} игроков",
+    seatingNodeLabel: "Место {n} — {name}",
+    seatingConfirm: "Подтвердить круг и начать ночь",
+    soloPackSuffix: " — Одиночная стая",
+    stepWakeAlt: "{role} просыпается",
+    narratorAlt: "Ведущий, рассказчик в капюшоне со светящимся гримуаром",
+
+    // Common
+    back: "← Назад",
+    next: "Далее",
+    continue: "Продолжить",
+    loading: "Загрузка…",
+    quit: "Выйти",
+    yes: "Да",
+    no: "Нет",
+    validate: "Подтвердить",
+    skip: "Пропустить",
+    random: "🎲 Случайно",
+    language: "Язык",
+    sound: "Звук",
+    soundOn: "Выключить звук",
+    soundOff: "Включить звук",
+    offline: "100% Оффлайн",
+
+    // Home
+    tagline: "Деревня засыпает…",
+    newGame: "Новая игра",
+    grimoire: "Гримуар ролей",
+    footer: "Nightfall Oracle",
+    logoAlt: "Волк, воющий на розовую луну",
+
+    // Grimoire
+    grimoireTitle: "Гримуар ролей",
+    grimoireHint:
+      "Нажмите на иконку информации на карте, чтобы узнать описание и способность роли.",
+    narratorTitle: "Ведущий (Ведущий игры)",
+    narratorIntro:
+      "Я — Ведущий игры. Я пробуждаю духов, считаю голоса и объявляю мёртвых. Следуйте моим указаниям: лишь одна ночь отделяет деревню от клыков.",
+    infoRole: "Посмотреть описание",
+    powerLabel: "Способность: ",
+
+    // Setup
+    setupTitle: "Имена игроков",
+    playerNamePlaceholder: "Имя игрока",
+    addPlayer: "+ Добавить игрока",
+    remove: "Удалить",
+    defaultPlayer: "Игрок",
+    debateTimer: "Таймер обсуждения",
+    debateTimerDesc: "Каждому игроку отводится ограниченное время на выступление.",
+    debateTimerToggle: "Включить таймер обсуждения",
+    custom: "Свой вариант",
+    perPlayerDebate: "{n} секунд на игрока в фазе обсуждения.",
+
+    // Game Master
+    gmTitle: "Ведущий игры",
+    gmSubtitle:
+      "Выберите Ведущего: он будет держать телефон и вести игру. Карта роли ему не выдаётся.",
+    gmRandom: "🎲 Случайный выбор",
+    gmNext: "Продолжить",
+    gmChosen: "Ведущий игры",
+    gmExcluded: "Ведущий не участвует: {n} активных игроков.",
+
+    // Composition
+    compositionTitle: "Состав деревни",
+    compositionCount: "{r} ролей выбрано для {p} игроков.",
+    distribute: "Раздать роли",
+    rolesProgress: "{r} / {p} ролей",
+
+    // Distribution
+    distributing: "Раздача ролей…",
+    playerXofY: "Игрок {i} / {n}",
+    passPhoneTo:
+      "Передайте телефон игроку {name}, затем откройте карту, не показывая её остальным.",
+    discoverRole: "Узнать свою роль",
+    memorized: "Я запомнил свою роль",
+    handoverTitle: "Передайте телефон Ведущему",
+    handoverText:
+      "Роли распределены. Я — Ведущий: отныне телефон у меня. Я буду управлять ночами, утрами и голосованиями.",
+    captainElection: "Выборы Капитана",
+    captainElectionDesc:
+      "Деревня выбирает Капитана поднятием рук. Его тайная роль остаётся скрытой: этот значок видит только Ведущий. Генерал не может быть избран.",
+    randomSelect: "🎲 Случайный выбор",
+    noCaptain: "Играть без Капитана",
+    startGame: "Начать игру",
+
+    // Game
+    nightN: "Ночь {n}",
+    dayN: "День {n}",
+    village: "Деревня ({n} живых)",
+    mjDashboard: "Панель Ведущего — Тайные роли видны",
+    nightEnds: "Ночь опускается на спящую деревню.",
+    raiseDay: "Разбудить деревню",
+    captain: "Капитан",
+    captainX2: "Капитан ×2",
+    cannotVote: "Не голосует",
+    immune: "Иммунитет",
+    wolfTag: "Волк",
+    converted: " (Обращён)",
+    convertedInfo: "Превращён в Оборотня (инфо Ведущего)",
+
+    // Night
+    secretWordTitle: "Секретное слово Болтливого Волка",
+    secretWordHint:
+      "Покажите этот экран Болтливому Волку. Он обязан сказать это слово во время утреннего обсуждения.",
+    editWord: "Изменить слово",
+    bavardSeen: "Болтливый Волк увидел своё слово",
+    packAgrees: "Стая пришла к согласию",
+    disagreement: "Разногласие — Матриарх решает единолично",
+    infectPlayer: "Заразить {name} (1 раз за игру)",
+    noirSoloVictimTitle: "Выбрать жертву",
+    noirSoloConfirm: "Чёрный Волк нападает",
+    muteTitle: "Заставить замолчать (опционально)",
+    muteUnavailable: "Способность лишения речи доступна со 2-й ночи.",
+    bearNeighbors: "Прямые соседи (инфо Ведущего)",
+    left: "Слева",
+    right: "Справа",
+    infected: " (Заражён)",
+    bearSniff: "Дрессировщик Медведя принюхивается к соседям",
+    execPrisoner: "Казнить узника",
+    healSave: "Спасти {name}",
+    poisonPotion: "Зелье смерти (опционально)",
+    witchTargetProtected: "Заступник уже защищает эту жертву — Зелье исцеления бесполезно.",
+
+    // Dawn & debate
+    debateTitle: "Обсуждение — День {n}",
+    debateText:
+      "Капитан открывает обсуждение, каждый игрок высказывается, затем Капитан подводит итог.",
+    captainMutedHint:
+      "Капитан лишён речи: он не выступает (ни во вступлении, ни в заключении), но сохраняет все свои решения — направление обсуждения, порядок и момент голосования.",
+    mutedBy: "Заставлены замолчать Чёрным Волком: {names}",
+    dawnTitle: "Рассвет — День {n}",
+    bavardWordOfDay: "Болтливый Волк, твоё слово на сегодня:",
+    firstDayVoteQuestion:
+      "Жители, хотите ли вы голосовать в этот первый день? Только этим утром голосование нетипично опционально.",
+    vote: "Голосовать",
+    noVote: "Без голосования",
+    forceVote: "Ведущий принудительно запускает голосование",
+    speaker: "Обсуждение — Выступает {i} / {n}",
+    opening: "Вступительное слово",
+    closing: "Заключительное слово",
+    pause: "Пауза",
+    resume: "Продолжить",
+    endDebate: "Завершить обсуждение",
+    extend30: "+30с",
+
+    // Debate wheel & vote
+    rotationClockwise: "По часовой стрелке",
+    rotationCounter: "Против часовой стрелки",
+    captainDirTitle: "Направление обсуждения",
+    captainDirText: "{name}, Капитан, выберите направление круга выступлений.",
+    dirClockwise: "По часовой стрелке (влево от Капитана)",
+    dirCounterClockwise: "Против часовой стрелки (вправо от Капитана)",
+    noCaptainDir: "Без Капитана: По умолчанию по часовой стрелке.",
+    setupDebateDir: "Направление обсуждения",
+    setupVoteDir: "Порядок голосования",
+    setupCaptainTiming: "Голосование Капитана",
+    captainVotesFirst: "Первым",
+    captainVotesLast: "Последним",
+    timerLockedHint: "Таймер обсуждения запустится только после подтверждения этих настроек.",
+    confirmCaptainSetup: "Подтвердить и начать обсуждение",
+    voteSetupTitle: "Настройка голосования",
+    voteSetupText: "{name}, выберите порядок голосования и момент для своего голоса.",
+    confirmVoteSetup: "Подтвердить и открыть голосование",
+    captainRevoteOneVote: "Переголосование: У Капитана только 1 голос.",
+    captainOpening: "Вступительная речь",
+    captainClosing: "Заключительная речь",
+    captainSplitTitle: "Капитан — 2 Очка Голоса",
+    captainVoteBoth: "Оба очка за 1 игрока",
+    captainVoteSplit: "Разделение: 1 очко + 1 очко",
+    captainSplitPickA: "Первое очко",
+    captainSplitPickB: "Второе очко",
+    captainSplitConfirm: "Подтвердить голос Капитана",
+    splitBadge: "Разделённый голос",
+    auditSplitLine: "{voter} ➔ Разделил: {target} + {target2}",
+    auditDoubleLine: "{voter} ➔ {target} ×2",
+    revoteTiedExcluded:
+      "Игроки, набравшие равное количество голосов, не участвуют в переголосовании.",
+    doubleElimAnnounce: "2-я ничья подряд: Оба игрока с равными голосами выбывают.",
+    evalTitle: "Оценка игры",
+    evalMvp: "MVP — Лучший игрок",
+    evalLvp: "LVP — Слабейший игрок",
+    evalFactions: "Результативность фракций",
+    evalScorecards: "Личные карточки",
+    evalAccuracy: "Точность голосования",
+    evalRoleEff: "Эффективность роли",
+    evalVotesCast: "Отдано очков голоса: {n}",
+    evalLeader: "Лидер голосований",
+    evalFollower: "Ведомый",
+    evalNoData: "Недостаточно данных для оценки.",
+    factionWolves: "Оборотни",
+    factionVillage: "Деревня",
+    factionSolo: "Одиночные роли",
+    currentSpeaker: "Выступающий",
+    villageLegend: "Легенда Деревни",
+    startTimer: "Старт",
+    pauseTimer: "Пауза",
+    resetTimer: "Сброс",
+    plus10: "+10с",
+    nextSpeaker: "Следующий спикер",
+    nowVoting: "Сейчас голосует",
+    abstain: "Воздержался / Пропустить",
+    auditTitle: "Аудит голосов",
+    auditLine: "{voter} ➔ проголосовал за {target}",
+    auditAbstain: "{voter} ➔ воздержался",
+    undoVote: "Отменить",
+    tallyComplete: "Завершить подсчёт и закрыть голосование",
+    topVoted: "Лидер голосования",
+    eliminateName: "Исключить {name}",
+    tieJudgeActive: "Ничья — Судья активен!",
+    passToJudge: "Передать решение Судье",
+    tieDetectedWith: "Ничья между {names}",
+    runRevoteTied: "Провести переголосование (только претенденты)",
+    captainBreaksTie: "Решение Капитана при ничьей",
+    skipElimination: "Без исключения",
+    voteProgress: "Голос {i} / {n}",
+    votesUnit: "голосов",
+
+    // Vote
+    voteTitle: "Голосование деревни — День {n}",
+    revoteSuffix: " (Переголосование)",
+    voteText:
+      "Деревня должна выбрать осуждённого. Подсчитайте голоса: минимум один игрок должен быть казнён.",
+    voteTotal: "Засчитано голосов: {c} / {t}",
+    voteTotalHint:
+      "Максимальное число голосов равно количеству живых + 1 (двойной голос Капитана).",
+    addVote: "Добавить голос за {name}",
+    removeVote: "Забрать голос у {name}",
+    bavardCheck: "Проверка — Болтливый Волк",
+    bavardAsk: "Сказал ли он своё слово '{word}'?",
+    bavardInactiveDay1: "Болтливый Волк был неактивен в Ночь 1 — без проверки.",
+    tieJudge:
+      "Ничья: Судья принимает решение. Выберите одного или нескольких игроков для казни или назначьте повторное голосование.",
+    judgeExecute: "Привести в исполнение вердикт Судьи",
+    orderRevote: "Назначить переголосование",
+    tieBreakOnly: "Переголосование — отображаются только {n} претендентов",
+    tieNote:
+      "Если после повторного голосования снова возникнет ничья, все претенденты будут казнены.",
+    validateExec: "Подтвердить казнь",
+    bavardPreVoteTitle: "Болтливый Волк — Перед голосованием",
+    bavardPreVoteAsk: "Произнёс ли он своё слово '{word}'?",
+    bavardPreVoteYes: "Да — Голосование продолжается",
+    bavardPreVoteNo: "Нет — Немедленная казнь",
+    gmSelectElim: "Выбор осуждённого",
+    gmSelectElimHint: "Выберите игрока или игроков для исключения.",
+    gmConfirmElim: "Подтвердить исключение",
+    gmRevoteAction: "Назначить переголосование",
+    undoStep: "← Отменить",
+
+    // Suicide / Revelation
+    causeSuicide: "Самоликвидация / Вскрытие роли",
+    gmSuicide: "Самоликвидация / Вскрытие роли",
+    suicideTitle: "Самоликвидация / Вскрытие роли",
+    suicideDesc:
+      "Выберите игрока, нарушившего правила или вскрывшего свою роль. Он немедленно выбывает, и наступает ночь.",
+    suicideConfirm: "💀 Подтвердить исключение",
+    suicideDone: "{name} исключён: Самоликвидация / Вскрытие роли.",
+
+    // Undo
+    undoLabel: "Отменить",
+    undoDoneToast: "Действие отменено",
+
+    // Black Wolf — actions hub
+    bwHubTitle: "Чёрный Волк — Действия",
+    bwTabAttack: "Атака",
+    bwTabInfect: "Заразить",
+    bwTabMute: "Заткнуть",
+    bwInfectAvailable: "Заражение доступно: 1/1",
+    bwInfectUsed: "Заражение уже использовано",
+    bwPickAttack: "Выберите жертву ночи.",
+    bwPickInfect: "Выберите игрока для заражения (присоединится к стае вместо гибели).",
+    bwPickMute: "Выберите игрока, который будет лишён речи на время утреннего обсуждения.",
+    bwNoVictimHint: "Стая ещё не выбрала жертву.",
+    gmTurnGuide: "Ход роли {role} — {name}. Направьте игрока и подтвердите действие.",
+    validateAction: "Подтвердить действие",
+    passTurn: "Пропустить ход",
+
+    // Summary — badges & evaluation
+    recapRounds: "{n} раундов",
+    turningPointTitle: "Переломный момент",
+    turningPointNone: "Переломных моментов в игре не зафиксировано.",
+    turningPointLine: "День {d}: Исключение игрока {name} ({role}) изменило ход игры.",
+    badgesTitle: "Награды по итогам игры",
+    badgeMastermind: "Гениальный стратег",
+    badgeMastermindDesc: "MVP: Идеальное чтение игры и решающие голоса.",
+    badgeEagleEye: "Соколиный глаз",
+    badgeEagleEyeDesc: "Высшая точность голосования.",
+    badgeOscar: "Премия Оскар",
+    badgeOscarDesc: "Волк, избавившийся от наибольшего числа мирных жителей.",
+    badgeGuardian: "Ангел-хранитель",
+    badgeGuardianDesc: "Спас наибольшее количество жизней.",
+    badgeBandwagoner: "Приспособленец",
+    badgeBandwagonerDesc: "Всегда голосует со всеми, не проявляя инициативы.",
+    badgeBlindSniper: "Слепой снайпер",
+    badgeBlindSniperDesc: "Худшая точность голосования.",
+    badgeIceCold: "Хладнокровный",
+    badgeIceColdDesc: "Решающий игрок среди 4 последних survivors.",
+    badgeSuicidal: "Раскрытая карта",
+    badgeSuicidalDesc: "Вскрыл роль и испортил игру.",
+    evalDeception: "Индекс обмана",
+    evalClutch: "Спасительный ход",
+    evalEarlyPush: "Инициативы",
+    evalBandwagon: "Конформизм",
+    evalHistory: "История действий",
+
+    // Events
+    captainSuccession: "Передача полномочий Капитана",
+    captainSuccessionText:
+      "{name} погибает. Перед уходом он сам назначает преемника: без нового голосования.",
+    transmit: "Передать полномочия",
+    hunterTitle: "Последний выстрел Охотника",
+    hunterText: "Охотник падает мёртвым, но его ружьё стреляет в последний раз.",
+    shoot: "Выстрелить",
+    eliminated: "Исключён",
+    villageStrikes: "Деревня наносит ответный удар",
+    villageDecided: "Деревня приняла решение",
+
+    // Transitions
+    nightFalls: "Наступает ночь",
+    dayRises: "Наступает день",
+    tapToContinue: "Нажмите, чтобы продолжить",
+    nightSubtitle: "Ночь {n} — Всем закрыть глаза",
+    daySubtitle: "День {n} — Деревня просыпается",
+
+    // Game Summary
+    bilanTitle: "Итоги игры",
+    bilanMvp: "⭐ MVP игры",
+    bilanMvpScore: "{n} очков",
+    bilanVoteHistory: "История голосований",
+    bilanDayVote: "День {n}",
+    bilanRevoteSuffix: " (Переголосование)",
+    bilanElim: "→ {names}",
+    bilanNobodyElim: "→ Никто",
+    bilanTeamDomination: "Стратегическое доминирование",
+    bilanVillageCtrl: "🏘️ Деревня: {pct}%",
+    bilanWolfCtrl: "🐺 Волки: {pct}%",
+    bilanBalanced: "Очень равная игра",
+    bilanDuration: "{d} дн. игры",
+    bilanSurvivors: "Выжившие: {n}",
+    bilanNoVotes: "Голосований не зафиксировано.",
+
+    // End
+    gameOver: "Конец игры",
+    gameOverFallback: "Игра завершена.",
+    recap: "Обзор",
+    colPlayer: "Игрок",
+    colRole: "Роль",
+    colTeam: "Фракция",
+    colStatus: "Статус",
+    statusAlive: "Жив",
+    statusDead: "Мёртв",
+    statusContaminated: "Заражён",
+
+    // Summary Card
+    recapVictoryWolves: "Победа Оборотней",
+    recapVictoryVillage: "Победа Деревни",
+    recapVictoryLovers: "Победа Влюблённых",
+    recapVictorySolo: "Одиночная победа",
+    recapVictoryBlackWolf: "Доминирование Чёрного Волка",
+    recapRoster: "Список игроков",
+    recapTimeline: "Хронология игры",
+    recapNoEvents: "Значимых событий не произошло.",
+    recapNightN: "Ночь {n}",
+    recapDayN: "День {n}",
+    recapRescued: "Спасён — {role}",
+    recapContaminatedBy: "Заражён Чёрным Волком",
+    playAgain: "Сыграть снова",
+    shareRecap: "Поделиться итогом",
+    shareCopied: "Итог скопирован!",
+    causeWolves: "Растерзан Оборотнями",
+    causePoison: "Отравлен Ведьмой",
+    causeWhiteWolf: "Убит Белым Волком",
+    causeHunter: "Застрелен Охотником",
+    causeHeartbreak: "Умер от разбитого сердца",
+    causeVote: "Казнён Деревней",
+    causeJailer: "Казнён Тюремщиком",
+    causeSpy: "Пойман на шпионаже",
+    causeTalkative: "Болтливый Волк промолчал",
+    causeGeneralStrike: "Убит Генералом",
+    causeGeneralFailed: "Генерал совершил ошибку",
+    causeManiac: "Зарезан Маньяком",
+    causeThreeFacesPoison: "Отравлен Трёхликим",
+    causePuppetProtection: "Смертельный перехват — марионетка приняла удар вместо кукловода",
+
+    // Night Report
+    nightReportTitle: "Отчёт за Ночь {n}",
+    nightReportSubtitle: "Полный обзор событий — Беззвучный экран, только для Ведущего.",
+    nightReportActions: "Ночные действия",
+    nightReportOutcomes: "Итоги ночи",
+    nightReportEmpty: "Ночных действий не зафиксировано.",
+    nightReportClose: "Разбудить деревню",
+    nightReportMuted: "🔇 Без озвучки, без звуков.",
+
+    // 3 faces
+    facesChoosePower:
+      "Выберите лик для раскрытия этой ночью (каждая способность используется 1 раз)",
+    facesProtect: "🛡️ Защита (Заступник)",
+    facesPotion: "⚗️ Зелье (Ведьма)",
+    facesInspect: "🔮 Проверка (Провидица)",
+    facesLifePotion: "Зелье исцеления — Спасти {name}",
+    facesPoisonPotion: "Зелье смерти — Выбрать цель",
+    facesPickTarget: "Выбрать цель",
+    facesNoPowerLeft: "Все три лика уже были использованы.",
+    facesRemaining: "Осталось способностей: {n}",
+
+    // Thief, Maniac & Puppeteer
+    thiefPickTarget: "Выберите игрока, у которого украдёте роль",
+    maniacPickTarget: "Выберите жертву (никакая защита не спасёт)",
+    marionnettistePickTarget: "Выберите игрока, который станет вашей марионеткой",
+    marionnetteTag: " (Марионетка)",
+
+    ultimateShield: "Абсолютный щит",
+    ultimateShieldDesc: "Защищает всю деревню от волков и заражения этой ночью. Одноразово.",
+    ultimateShieldWarn:
+      "Внимание: После активации Заступник навсегда теряет все защитные способности.",
+    ultimateShieldActivate: "Активировать Абсолютный щит",
+    ultimateShieldConfirm: "Да, активировать и лишиться сил",
+    voteRanking: "Рейтинг голосования — От большинства к меньшинству",
+
+    newWordPlaceholder: "Новое слово…",
+    cancel: "Отмена",
+    roleWakeAlt: "{role} просыпается",
+
+    // GM Stars
+    starAward: "Дать звезду игроку {name}",
+    starRemove: "Забрать звезду у игрока {name}",
+    starsLabel: "Звёзды",
+    starsHint: "Нажмите ⭐ в карточке игрока за блестящую дедукцию. Зажмите, чтобы удалить.",
+    starsEarned: "{n} ⭐",
+    badgeStarTown: "Элитный детектив",
+    badgeStarTownDesc: "Мирный житель с наибольшим количеством звёзд от Ведущего.",
+    badgeStarWolf: "Мастер обмана",
+    badgeStarWolfDesc: "Волк, получивший больше всего звёзд за хитроумные манёвры.",
+
+    // GM Guide
+    guideButton: "Гайд Ведущего",
+    guideTitle: "Руководство Ведущего игры",
+    guideStepOf: "Шаг {i} / {n}",
+    guideClose: "Закрыть гайд",
+    guideStart: "Погнали!",
+
+    // Fox & Confidant — Joker mechanics
+    foxReveal: "🦊 Разоблачение Лисы",
+    foxRevealDesc:
+      "Лиса публично раскрывает ночные события: немедленное самоубийство. Доверенное лицо становится Джокером.",
+    foxRevealConfirm: "Подтвердить разоблачение Лисы",
+    confidantReveal: "📜 Разоблачение Доверенного лица",
+    confidantRevealDesc:
+      "Доверенное лицо раскрывает секреты Лисы: немедленное самоубийство. Лиса становится Джокером.",
+    confidantRevealConfirm: "Подтвердить разоблачение Доверенного лица",
+    jokerAssignedToast: "{name} теперь Джокер!",
+    foxRevealDoneToast:
+      "{name} (Лиса) ликвидирован: самоубийство. {confidant} становится Джокером.",
+    confidantRevealDoneToast:
+      "{name} (Доверенное лицо) ликвидирован: самоубийство. {fox} становится Джокером.",
+
+    // GM Notes
+    gmNotesTitle: "Заметки Ведущего",
+    gmNotesShow: "Показать",
+    gmNotesHide: "Скрыть",
+    gmNotesPlaceholder: "Делайте заметки здесь (например: улики, подозрения, союзы)...",
+
+    // Guide modal — rules
+    guideRulesTitle: "Правила и советы Ведущему",
+    guideRulesNight:
+      "Ночь: Следуйте вызовам на экране по порядку. Каждая роль выполняет своё действие тайно.",
+    guideRulesDawn:
+      "Рассвет: Раскройте ночной отчёт и запустите колесо дебатов. Игроки говорят по очереди.",
+    guideRulesVote:
+      "Голосование: Следуйте направлению колеса, чтобы справедливо собрать выбор каждого жителя.",
+    guideRulesUndo:
+      "Кнопка Отменить: Если вы ошиблись вводе ночью или при голосовании, можно вернуться.",
+    guideCloseBtn: "Закрыть",
+
+    // Defense timer
+    defenseTitle: "Время Защиты ({n} голосов)",
+    defenseDesc: "У {name} есть минута на защиту!",
+    pauseBtn: "Пауза",
+    startBtn: "Старт",
+    endDefense: "Завершить защиту",
+
+    // Penalty toasts
+    penaltyRemovedToast: "Штраф снят с {name}",
+    penaltyAddedToast: "Штраф за дебат начислен {name}",
+
+    // Skip vote during first day voting
+    skipVoteDay1Vote: "Пропустить голосование (День 1)",
+    guideStep1Kicker: "Шаг 1",
+    guideStep1Title: "Настройка и Игроки",
+    guideStep1Body:
+      "Введите имена игроков и нажмите '+ Добавить игрока'. Выберите состав ролей и настройте таймер перед стартом.",
+    guideStep2Kicker: "Шаг 2",
+    guideStep2Title: "Раздача и Тайные роли",
+    guideStep2Body:
+      "Передавайте телефон по кругу: каждый игрок тайно смотрит свою карту, запоминает её и скрывает экран перед передачей.",
+    guideStep3Kicker: "Шаг 3",
+    guideStep3Title: "Ход Ночи",
+    guideStep3Body:
+      "Ведущий по очереди будит роли (Оборотни, Провидица, Ведьма...). Нажимайте на иконку игрока для действия: съесть, спасти, проверить или заткнуть.",
+    guideStep4Kicker: "Шаг 4",
+    guideStep4Title: "День, Обсуждение и Звёзды ⭐",
+    guideStep4Body:
+      "Зачитайте ночной отчёт, дайте Капитану выбрать направление и вращайте круг. Игроки без речи пропускают ход. Выдавайте звёзды за точные догадки.",
+    guideStep5Kicker: "Шаг 5",
+    guideStep5Title: "Голосование и Казнь",
+    guideStep5Body:
+      "Отмечайте голоса по одному. Голос Капитана решает при ничьей; иначе запускается переголосование. Погибший вскрывает роль и применяет способности.",
+    guideStep6Kicker: "Шаг 6",
+    guideStep6Title: "Финал и Оценка",
+    guideStep6Body:
+      "При победе одной из сторон итоговая карточка покажет рейтинг игроков: точность голосов, эффективность ролей, звёзды и почетные значки.",
+
+    // Orientation
+    rotateTitle: "Поверните телефон",
+    rotateText:
+      "Nightfall Oracle рассчитана на портретный режим. Поставьте устройство вертикально.",
+
+    // Missing keys — added for full localization
+    pass: "Пропустить ход",
+    witchLifePotion: "Зелье жизни",
+    witchLifeUsed: "Зелье жизни уже использовано",
+    witchSavingVictim: "Спасение {name}",
+    witchSaveVictimPrompt: "Спасти {name} (Зелье жизни)",
+    nobodyAttacked: "Никто не был атакован этой ночью.",
+    witchDeathPotion: "Зелье смерти (Яд)",
+    witchDeathUsed: "Зелье смерти уже использовано",
+    bwInfectingTarget: "Заражение {name}",
+    bwInfectPrompt: "Заразить {name} (присоединяется к стае вместо смерти)",
+    bwNoVictimToInfect: "Нет жертвы для заражения.",
+    facesHealVictim: "Спасти {name} (Зелье жизни)",
+    facesNoVictimToHeal: "Нет жертвы для спасения",
+    facesSwitchPoison: "Переключиться на Зелье смерти",
+    bearLeftNeighbor: "Левый сосед",
+    bearRightNeighbor: "Правый сосед",
+    bearStatusGrowling: "🐻 Медведь РЫЧИТ! (Минимум 1 волк рядом)",
+    bearStatusCalm: "🐻 Медведь спокоен (Волков рядом нет)",
+    petiteFillePeek: "Подглядеть за оборотнями",
+    petiteFilleSleep: "Спать спокойно",
+    ultimateShieldToggle: "Активировать Абсолютный Щит (Одноразово)",
+    hunterShotTitle: "Месть Охотника",
+    hunterShotDesc: "{name} был исключён! Может забрать с собой ещё одного игрока.",
+    hunterFireConfirm: "Выстрелить по выбранной цели",
+    captainSuccessionTitle: "Наследование Капитана",
+    captainSuccessionDesc: "{name} пал и должен назначить нового Капитана.",
+    assignCaptainConfirm: "Передать Капитанство",
+    dawnSummaryTitle: "Итоги рассвета",
+    eventsTitle: "Ночные события",
+    skipDay1Vote: "Пропустить голосование Дня 1 (По желанию)",
+  },
+  prompts: {
+    ...NEW_ROLE_LOCALES.ru.prompts,
+    cupidon: "Укажите двух влюблённых.",
+    mime: "Выберите игрока, чью роль вы скопируете.",
+    "enfant-sauvage": "Выберите своего кумира.",
+    geolier: "Кого вы заточите в камеру этой ночью?",
+    voyante: "Какого игрока вы хотите проверить?",
+    salvateur:
+      "Кого вы защитите этой ночью? (Нельзя выбирать одного и того же игрока два раза подряд)",
+    "petite-fille": "Вы приоткрываете глаза… Шпионили ли вы за стаей?",
+    "loup-garou": "Стая выбирает жертву. В случае разногласий Матриарх решает единолично.",
+    "loup-noir": "Заразите жертву (1 раз за игру) и/или заставьте одного из игроков замолчать.",
+    "loup-blanc": "Хотите ли вы съесть другого оборотня этой ночью?",
+    "loup-bavard":
+      "Ведущий показывает вам секретное слово: вы обязаны произнести его во время утреннего обсуждения.",
+    sorciere: "Используйте свои зелья.",
+    "joueur-de-flute": "Зачаруйте двух игроков.",
+    corbeau: "Кому вы подбросите чёрное перо?",
+    tavernier: "Кого вы угостите напитком?",
+    general: "Выберите игрока, в которого вы выстрелите. Если это не волк, вы погибнете.",
+    "montreur-dours": "Медведь принюхивается к своим прямым соседям…",
+    "trois-faces": "Выберите один из трёх ликов: защита, зелье или проверка.",
+    voleur: "Украдите роль у игрока: он станет обычным мирным жителем.",
+    maniaque: "Укажите жертву, которую не спасёт ни одна защита.",
+    marionnettiste:
+      "Выберите свою марионетку. Если вас атакуют, марионетка примет удар на себя, а вы лишитесь речи во время обсуждения.",
+    renard: "Вы получаете смутный отчёт о событиях ночи.",
+  } as Record<string, string>,
+  teams: {
+    VILLAGEOIS: "Деревня",
+    WEREWOLVES: "Оборотни",
+    SOLO: "Одиночки",
+    LOVERS: "Влюблённые",
+    DYNAMIC: "Динамическая",
+  } as Record<string, string>,
+  roles: {
+    ...NEW_ROLE_LOCALES.ru.roles,
+    marionnettiste: {
+      name: "Кукловод",
+      description:
+        "Вы связываете свою судьбу с марионеткой. Если ночью на вас нападут, марионетка погибнет вместо вас, а вы лишитесь речи на время утреннего обсуждения.",
+      power:
+        "Выберите марионетку. При нападении она принимает удар на себя, а вы молчите во время обсуждения.",
+    },
+    renard: {
+      name: "Лиса",
+      description:
+        "Бродячая лиса деревни. Каждую ночь получает смутный ночной отчёт от Ведущего. В свою последнюю ночь должна выбрать доверенное лицо, чтобы поделиться секретами.",
+      power:
+        "Каждую ночь Ведущий кратко информирует Лису о событиях. В последнюю ночь она назначает доверенное лицо. Если кто-либо раскроет эту информацию публично, он будет устранён, а другой станет ДЖОКЕРОМ.",
+    },
+  } as Record<string, { name: string; description: string; power: string }>,
+};
+
+export type UiKey = keyof typeof ru.ui;
+export type Dictionary = typeof ru;

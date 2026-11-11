@@ -1,0 +1,612 @@
+import { NEW_ROLE_LOCALES } from "./new-roles";
+/** German dictionary — translated from French source of truth. */
+export const de = {
+  ui: {
+    ...NEW_ROLE_LOCALES.de.ui,
+    seatingTitle: "Sitzordnung",
+    seatingHint:
+      "Ziehe einen Spieler auf einen anderen, um ihre Plätze zu tauschen. Die Sitzordnung bestimmt die Nachbarn.",
+    seatingTable: "Tisch",
+    seatingCount: "{n} Spieler",
+    seatingNodeLabel: "Platz {n} — {name}",
+    seatingConfirm: "Sitzordnung bestätigen & Nacht starten",
+    soloPackSuffix: " — Einsames Rudel",
+    stepWakeAlt: "{role} erwacht",
+    narratorAlt: "Der Erzähler, der maskierte Geschichtenerzähler mit dem leuchtenden Zauberbuch",
+    // Common
+    back: "← Zurück",
+    next: "Weiter",
+    continue: "Fortfahren",
+    loading: "Laden…",
+    quit: "Beenden",
+    yes: "Ja",
+    no: "Nein",
+    validate: "Bestätigen",
+    skip: "Überspringen",
+    random: "🎲 Zufall",
+    language: "Sprache",
+    sound: "Ton",
+    soundOn: "Stummschalten",
+    soundOff: "Ton einschalten",
+    offline: "100% Offline",
+
+    // Home
+    tagline: "Das Dorf schläft…",
+    newGame: "Neues Spiel",
+    grimoire: "Rollenbuch",
+    footer: "Nightfall Oracle",
+    logoAlt: "Heulender Wolf vor einem rosa Mond",
+
+    // Grimoire
+    grimoireTitle: "Rollenbuch",
+    grimoireHint:
+      "Klicke auf das Info-Symbol einer Karte, um Beschreibung und Fähigkeit anzuzeigen.",
+    narratorTitle: "Der Erzähler (Spielleiter)",
+    narratorIntro:
+      "Ich bin der Spielleiter. Ich wecke die Seelen, zähle die Stimmen und verkünde die Toten. Folge meinen Anweisungen: Nur eine Nacht trennt das Dorf von den Reißzähnen.",
+    infoRole: "Beschreibung anzeigen",
+    powerLabel: "Fähigkeit: ",
+
+    // Setup
+    setupTitle: "Spielernamen",
+    playerNamePlaceholder: "Spielername",
+    addPlayer: "+ Spieler hinzufügen",
+    remove: "Entfernen",
+    defaultPlayer: "Spieler",
+    debateTimer: "Diskussions-Timer",
+    debateTimerDesc: "Jeder Spieler hat eine begrenzte Sprechzeit.",
+    debateTimerToggle: "Diskussions-Timer aktivieren",
+    custom: "Benutzerdefiniert",
+    perPlayerDebate: "{n} Sekunden pro Spieler in der Diskussionsphase.",
+
+    // Game Master
+    gmTitle: "Spielleiter",
+    gmSubtitle:
+      "Wähle den Spielleiter: Er hält das Smartphone und leitet das Spiel. Er erhält keine Rollenkarte.",
+    gmRandom: "🎲 Zufallsauswahl",
+    gmNext: "Weiter",
+    gmChosen: "Spielleiter",
+    gmExcluded: "Der Spielleiter spielt nicht mit: {n} aktive Spieler.",
+
+    // Composition
+    compositionTitle: "Dorf-Zusammenstellung",
+    compositionCount: "{r} Rollen für {p} Spieler ausgewählt.",
+    distribute: "Rollen verteilen",
+    rolesProgress: "{r} / {p} Rollen",
+
+    // Distribution
+    distributing: "Rollen werden verteilt…",
+    playerXofY: "Spieler {i} / {n}",
+    passPhoneTo:
+      "Gib das Telefon an {name} weiter. Enthülle dann die Karte, ohne sie den anderen zu zeigen.",
+    discoverRole: "Meine Rolle entdecken",
+    memorized: "Ich kenne meine Rolle",
+    handoverTitle: "Gib das Telefon dem Spielleiter",
+    handoverText:
+      "Die Karten wurden verteilt. Ich bin der Spielleiter: Ab jetzt behalte ich das Telefon. Ich leite die Nächte, die Morgen und die Abstimmungen.",
+    captainElection: "Hauptmannswahl",
+    captainElectionDesc:
+      "Das Dorf wählt seinen Hauptmann durch Handzeichen. Seine geheime Rolle bleibt verborgen: Nur der Spielleiter sieht dieses Abzeichen. Der General kann nicht gewählt werden.",
+    randomSelect: "🎲 Zufallsauswahl",
+    noCaptain: "Ohne Hauptmann spielen",
+    startGame: "Spiel starten",
+
+    // Game
+    nightN: "Nacht {n}",
+    dayN: "Tag {n}",
+    village: "Dorf ({n} Lebende)",
+    mjDashboard: "Spielleiter-Dashboard — Geheime Rollen sichtbar",
+    nightEnds: "Die Nacht über dem schlafenden Dorf endet.",
+    raiseDay: "Dorf aufwecken",
+    captain: "Hauptmann",
+    captainX2: "Hauptmann ×2",
+    cannotVote: "Stimmt nicht ab",
+    immune: "Immun",
+    wolfTag: "Wolf",
+    converted: " (Verwandelt)",
+    convertedInfo: "In einen Werwolf verwandelt (Spielleiter-Info)",
+
+    // Night
+    secretWordTitle: "Geheimwort des Plapperwolfs",
+    secretWordHint:
+      "Zeige diesen Bildschirm dem Plapperwolf. Er muss dieses Wort während der Morgendiskussion sagen.",
+    editWord: "Wort bearbeiten",
+    bavardSeen: "Plapperwolf hat sein Wort gesehen",
+    packAgrees: "Rudel ist sich einig",
+    disagreement: "Uneinigkeit — Urwolf entscheidet",
+    infectPlayer: "{name} infizieren (einmal pro Spiel)",
+    noirSoloVictimTitle: "Opfer bestimmen",
+    noirSoloConfirm: "Schwarzer Wolf schlägt zu",
+    muteTitle: "Verstummen erlegen (optional)",
+    muteUnavailable: "Verstummung erst ab Nacht 2 verfügbar.",
+    bearNeighbors: "Direkte Nachbarn (Spielleiter-Info)",
+    left: "Links",
+    right: "Rechts",
+    infected: " (Infiziert)",
+    bearSniff: "Bär schnüffelt an Nachbarn",
+    execPrisoner: "Gefangenen hinrichten",
+    healSave: "{name} retten",
+    poisonPotion: "Todestrank (optional)",
+    witchTargetProtected: "Der Beschützer beschützt dieses Opfer bereits — Heiltrank nutzlos.",
+
+    // Dawn & debate
+    debateTitle: "Diskussion — Tag {n}",
+    debateText:
+      "Der Hauptmann eröffnet die Diskussion, jeder Spieler spricht, dann schließt der Hauptmann.",
+    captainMutedHint:
+      "Der Hauptmann ist verstummt: Er erhält keine Sprechzeit (weder Eröffnung noch Abschluss), behält aber alle seine Entscheidungen — Diskussionsrichtung, Abstimmungsrichtung und Timing seiner Stimme.",
+    mutedBy: "Vom Schwarzen Wolf zum Schweigen gebracht: {names}",
+    dawnTitle: "Morgengrauen — Tag {n}",
+    bavardWordOfDay: "Plapperwolf, dein Tageswort lautet:",
+    firstDayVoteQuestion:
+      "Dorfbewohner, möchtet ihr an diesem ersten Tag abstimmen? Nur heute Morgen ist die Abstimmung optional.",
+    vote: "Abstimmen",
+    noVote: "Keine Abstimmung",
+    forceVote: "Spielleiter erzwingt Dorf-Abstimmung",
+    speaker: "Diskussion — Sprecher {i} / {n}",
+    opening: "Eröffnung",
+    closing: "Abschluss",
+    pause: "Pause",
+    resume: "Fortsetzen",
+    endDebate: "Diskussion beenden",
+    extend30: "+30s",
+
+    // Debate wheel & vote
+    rotationClockwise: "Im Uhrzeigersinn",
+    rotationCounter: "Gegen den Uhrzeigersinn",
+    captainDirTitle: "Diskussionsrichtung",
+    captainDirText: "{name}, Hauptmann, wähle die Reihenfolge der Diskussion.",
+    dirClockwise: "Im Uhrzeigersinn (links vom Hauptmann)",
+    dirCounterClockwise: "Gegen den Uhrzeigersinn (rechts vom Hauptmann)",
+    noCaptainDir: "Kein Hauptmann: Im Uhrzeigersinn angewendet.",
+    setupDebateDir: "Diskussionsrichtung",
+    setupVoteDir: "Abstimmungsrichtung",
+    setupCaptainTiming: "Hauptmanns-Stimme",
+    captainVotesFirst: "Zuerst",
+    captainVotesLast: "Zuletzt",
+    timerLockedHint: "Der Diskussions-Timer startet erst nach Bestätigung dieser Einstellungen.",
+    confirmCaptainSetup: "Bestätigen & Diskussion starten",
+    voteSetupTitle: "Abstimmungs-Setup",
+    voteSetupText: "{name}, wähle die Abstimmungsrichtung und das Timing deiner Stimme.",
+    confirmVoteSetup: "Bestätigen & Abstimmung starten",
+    captainRevoteOneVote: "Stichwahl: Hauptmann hat nur 1 Stimme.",
+    captainOpening: "Eröffnungsrede",
+    captainClosing: "Schlussrede",
+    captainSplitTitle: "Hauptmann — 2 Stimmpunkte",
+    captainVoteBoth: "Beide Punkte für einen Spieler",
+    captainVoteSplit: "Aufteilung: 1 Punkt + 1 Punkt",
+    captainSplitPickA: "Erster Punkt",
+    captainSplitPickB: "Zweiter Punkt",
+    captainSplitConfirm: "Hauptmanns-Stimme bestätigen",
+    splitBadge: "Geteilte Stimme",
+    auditSplitLine: "{voter} ➔ Geteilt: {target} + {target2}",
+    auditDoubleLine: "{voter} ➔ {target} ×2",
+    revoteTiedExcluded: "Spieler im Gleichstand stimmen bei dieser Stichwahl nicht ab.",
+    doubleElimAnnounce:
+      "Zweiter Gleichstand in Folge: Beide unentschiedenen Spieler werden eliminiert.",
+    evalTitle: "Spielauswertung",
+    evalMvp: "MVP — Bester Spieler",
+    evalLvp: "LVP — Schwächster Spieler",
+    evalFactions: "Fraktionsleistung",
+    evalScorecards: "Spielerkarten",
+    evalAccuracy: "Abstimmungsgenauigkeit",
+    evalRoleEff: "Rolleneffizienz",
+    evalVotesCast: "{n} Stimmpunkte vergeben",
+    evalLeader: "Stimmenanführer",
+    evalFollower: "Mitläufer",
+    evalNoData: "Nicht genügend Daten für die Auswertung verfügbar.",
+    factionWolves: "Werwölfe",
+    factionVillage: "Dorf",
+    factionSolo: "Einzelgänger",
+    currentSpeaker: "Sprecher",
+    villageLegend: "Dorflegende",
+    startTimer: "Start",
+    pauseTimer: "Pause",
+    resetTimer: "Zurücksetzen",
+    plus10: "+10s",
+    nextSpeaker: "Nächster Sprecher",
+    nowVoting: "Stimmt jetzt ab",
+    abstain: "Enthaltung / Überspringen",
+    auditTitle: "Stimmen-Audit",
+    auditLine: "{voter} ➔ stimmte für {target}",
+    auditAbstain: "{voter} ➔ hat sich enthalten",
+    undoVote: "Rückgängig",
+    tallyComplete: "Auszählung beendet & Abstimmung schließen",
+    topVoted: "Meiste Stimmen",
+    eliminateName: "{name} eliminieren",
+    tieJudgeActive: "Gleichstand — Richter ist aktiv!",
+    passToJudge: "Entscheidung an Richter übergeben",
+    tieDetectedWith: "Gleichstand zwischen {names}",
+    runRevoteTied: "Stichwahl (nur unentschiedene Spieler)",
+    captainBreaksTie: "Hauptmann bricht den Gleichstand",
+    skipElimination: "Keine Elimination",
+    voteProgress: "Abstimmung {i} / {n}",
+    votesUnit: "Stimmen",
+
+    // Vote
+    voteTitle: "Dorf-Abstimmung — Tag {n}",
+    revoteSuffix: " (Stichwahl)",
+    voteText:
+      "Das Dorf muss den Verurteilten bestimmen. Zähle die Stimmen: Mindestens ein Spieler sollte eliminiert werden.",
+    logRavenTarget:
+      "Der Rabe visiert {name} an. Dieser Spieler startet die Abstimmung mit {count} Stimme(n) gegen sich.",
+    voteTotal: "Vergebene Stimmen: {c} / {t}",
+    voteTotalHint:
+      "Mögliche Gesamtstimmen entsprechen Anzahl der Lebenden + 1 (doppelte Hauptmannsstimme).",
+    addVote: "Stimme für {name} hinzufügen",
+    removeVote: "Stimme von {name} entfernen",
+    bavardCheck: "Überprüfung — Plapperwolf",
+    bavardAsk: "Hat er sein Wort '{word}' gesagt?",
+    bavardInactiveDay1: "Der Plapperwolf war in der 1. Nacht inaktiv — keine Überprüfung.",
+    tieJudge:
+      "Gleichstand: Der Richter entscheidet. Er wählt einen oder mehere Unentschiedene zur Elimination oder ordnet eine Stichwahl an.",
+    judgeExecute: "Urteil des Richters vollstrecken",
+    orderRevote: "Stichwahl anordnen",
+    tieBreakOnly: "Gleichstand brechen — nur die {n} unentschiedenen Spieler werden angezeigt",
+    tieNote:
+      "Bei einem erneuten Gleichstand nach der Stichwahl werden alle unentschiedenen Spieler eliminiert.",
+    validateExec: "Hinrichtung bestätigen",
+    bavardPreVoteTitle: "Plapperwolf — Vor der Abstimmung",
+    bavardPreVoteAsk: "Hat er sein Wort '{word}' gesagt?",
+    bavardPreVoteYes: "Ja — Abstimmung wird fortgesetzt",
+    bavardPreVoteNo: "Nein — Sofortige Hinrichtung",
+    gmSelectElim: "Verurteilte(n) auswählen",
+    gmSelectElimHint: "Wähle den/die zu eliminierenden Spieler aus.",
+    gmConfirmElim: "Elimination bestätigen",
+    gmRevoteAction: "Stichwahl anordnen",
+    undoStep: "← Rückgängig",
+    // Suicide / Revelation
+    causeSuicide: "Selbstmord / Enthüllung",
+    gmSuicide: "Selbstmord / Enthüllung",
+    suicideTitle: "Selbstmord / Enthüllung",
+    suicideDesc:
+      "Wähle den Spieler aus, der gegen die Regeln verstoßen oder seine Rolle enthüllt hat. Er wird sofort eliminiert und die Nacht bricht an.",
+    suicideConfirm: "💀 Elimination bestätigen",
+    suicideDone: "{name} wurde eliminiert: Selbstmord / Enthüllung.",
+    // Undo
+    undoLabel: "Zurück",
+    undoDoneToast: "Aktion rückgängig gemacht",
+    // Black Wolf — actions hub
+    bwHubTitle: "Schwarzer Wolf — Aktionen",
+    bwTabAttack: "Angriff",
+    bwTabInfect: "Infizieren",
+    bwTabMute: "Verstummen",
+    bwInfectAvailable: "Infektion verfügbar: 1/1",
+    bwInfectUsed: "Infektion bereits verwendet",
+    bwPickAttack: "Bestimme das Opfer der Nacht.",
+    bwPickInfect: "Wähle den zu infizierenden Spieler (tritt dem Rudel bei, anstatt zu sterben).",
+    bwPickMute: "Wähle den Spieler, der in der Morgendiskussion schweigen muss.",
+    bwNoVictimHint: "Das Rudel hat noch kein Opfer bestimmt.",
+    gmTurnGuide: "Zug von {role} — {name}. Weise den Spieler an und bestätige die Aktion.",
+    validateAction: "Aktion bestätigen",
+    passTurn: "Zug überspringen",
+    // Summary — badges & evaluation
+    recapRounds: "{n} Runden",
+    turningPointTitle: "Wendepunkt",
+    turningPointNone: "Kein entscheidender Wendepunkt aufgezeichnet.",
+    turningPointLine: "Tag {d}: Die Elimination von {name} ({role}) hat das Spiel gewendet.",
+    badgesTitle: "Endspiel-Auszeichnungen",
+    badgeMastermind: "Mastermind",
+    badgeMastermindDesc: "MVP: Perfektes Lesen und entscheidende Stimmen.",
+    badgeEagleEye: "Adlerauge",
+    badgeEagleEyeDesc: "Höchste Abstimmungsgenauigkeit.",
+    badgeOscar: "Oscar bester Darsteller",
+    badgeOscarDesc: "Der Wolf, der die meisten Dorfbewohner zur Elimination trieb.",
+    badgeGuardian: "Schutzengel",
+    badgeGuardianDesc: "Die meisten Leben gerettet.",
+    badgeBandwagoner: "Mitläufer",
+    badgeBandwagonerDesc: "Immer bei der Mehrheit, übernimmt nie die Initiative.",
+    badgeBlindSniper: "Blinder Schütze",
+    badgeBlindSniperDesc: "Geringste Abstimmungsgenauigkeit.",
+    badgeIceCold: "Eiskalt",
+    badgeIceColdDesc: "Entscheidend unter den letzten 4 Überlebenden.",
+    badgeSuicidal: "Enthüllungs-Suizid",
+    badgeSuicidalDesc: "Hat seine Rolle enthüllt und das Spiel ruiniert.",
+    evalDeception: "Täuschungsindex",
+    evalClutch: "Clutch-Rettung",
+    evalEarlyPush: "Initiativen",
+    evalBandwagon: "Mitläufertum",
+    evalHistory: "Aktionsverlauf",
+
+    // Events
+    captainSuccession: "Hauptmanns-Nachfolge",
+    captainSuccessionText:
+      "{name} stirbt. Vor dem Scheiden bestimmt er selbst seinen Nachfolger: Keine neue Wahl.",
+    transmit: "Nachfolge übergeben",
+    hunterTitle: "Der letzte Schuss des Jägers",
+    hunterText: "Der Jäger bricht zusammen, aber seine Flinte spricht ein letztes Mal.",
+    shoot: "Schießen",
+    eliminated: "Eliminiert",
+    villageStrikes: "Das Dorf schlägt zu",
+    villageDecided: "Das Dorf hat entschieden",
+
+    // Transitions
+    nightFalls: "Die Nacht bricht an",
+    dayRises: "Der Tag bricht an",
+    tapToContinue: "Tippen zum Fortfahren",
+    nightSubtitle: "Nacht {n} — Alle schließen die Augen",
+    daySubtitle: "Tag {n} — Das Dorf erwacht",
+
+    // Game Summary
+    bilanTitle: "Spielbilanz",
+    bilanMvp: "⭐ Spiel-MVP",
+    bilanMvpScore: "{n} Punkte",
+    bilanVoteHistory: "Abstimmungsverlauf",
+    bilanDayVote: "Tag {n}",
+    bilanRevoteSuffix: " (Stichwahl)",
+    bilanElim: "→ {names}",
+    bilanNobodyElim: "→ Niemand",
+    bilanTeamDomination: "Strategische Dominanz",
+    bilanVillageCtrl: "🏘️ Dorf: {pct}%",
+    bilanWolfCtrl: "🐺 Wölfe: {pct}%",
+    bilanBalanced: "Sehr ausgewogenes Spiel",
+    bilanDuration: "{d} Tag(e) Spielzeit",
+    bilanSurvivors: "Überlebende: {n}",
+    bilanNoVotes: "Keine Stimmen verzeichnet.",
+
+    // End
+    gameOver: "Spiel vorbei",
+    gameOverFallback: "Das Spiel ist zu Ende.",
+    recap: "Zusammenfassung",
+    colPlayer: "Spieler",
+    colRole: "Rolle",
+    colTeam: "Fraktion",
+    colStatus: "Status",
+    statusAlive: "Lebendig",
+    statusDead: "Tot",
+    statusContaminated: "Infiziert",
+
+    // Summary Card
+    recapVictoryWolves: "Sieg der Werwölfe",
+    recapVictoryVillage: "Sieg des Dorfes",
+    recapVictoryLovers: "Sieg des Liebespaars",
+    recapVictorySolo: "Einzelsieg",
+    recapVictoryBlackWolf: "Dominanz des Schwarzen Wolfs",
+    recapRoster: "Spielerliste",
+    recapTimeline: "Spielverlauf",
+    recapNoEvents: "Keine bemerkenswerten Ereignisse.",
+    recapNightN: "Nacht {n}",
+    recapDayN: "Tag {n}",
+    recapRescued: "Gerettet — {role}",
+    recapContaminatedBy: "Vom Schwarzen Wolf infiziert",
+    playAgain: "Nochmal spielen",
+    shareRecap: "Zusammenfassung teilen",
+    shareCopied: "Zusammenfassung kopiert!",
+    causeWolves: "Von Werwölfen gefressen",
+    causePoison: "Von der Hexe vergiftet",
+    causeWhiteWolf: "Vom Weißen Wolf getötet",
+    causeHunter: "Vom Jäger erschossen",
+    causeHeartbreak: "An gebrochenem Herzen gestorben",
+    causeVote: "Vom Dorf hingerichtet",
+    causeJailer: "Vom Gefängniswärter hingerichtet",
+    causeSpy: "Beim Spionieren erwischt",
+    causeTalkative: "Plapperwolf blieb stumm",
+    causeGeneralStrike: "Vom General getroffen",
+    causeGeneralFailed: "General ist gescheitert",
+    causeManiac: "Vom Maniac ermordet",
+    causeThreeFacesPoison: "Durch Drei Gesichter vergiftet",
+    causePuppetProtection:
+      "Tödlicher Abfangschutz — Die Puppe fing den Schaden anstelle des Puppenspielers ab",
+
+    // Night Report
+    nightReportTitle: "Nachtbericht {n}",
+    nightReportSubtitle:
+      "Vollständige Aktionsübersicht — Stummer Bildschirm, nur für den Spielleiter.",
+    nightReportActions: "Nachtaktionen",
+    nightReportOutcomes: "Nachtergebnisse",
+    nightReportEmpty: "Keine Nachtaktionen aufgezeichnet.",
+    nightReportClose: "Dorf aufwecken",
+    nightReportMuted: "🔇 Kein Erzähler, kein Ton.",
+
+    // 3 faces
+    facesChoosePower: "Wähle das Gesicht für diese Nacht (jede Kraft nur einmal)",
+    facesProtect: "🛡️ Schutz (Beschützer)",
+    facesPotion: "⚗️ Trank (Hexe)",
+    facesInspect: "🔮 Inspektion (Seherin)",
+    facesLifePotion: "Heiltrank — {name} retten",
+    facesPoisonPotion: "Gifttrank — Ziel wählen",
+    facesPickTarget: "Ziel wählen",
+    facesNoPowerLeft: "Alle drei Gesichter wurden bereits verwendet.",
+    facesRemaining: "Verbleibende Kräfte: {n}",
+
+    // Thief, Maniac & Puppeteer
+    thiefPickTarget: "Wähle einen Spieler, dessen Rolle du stiehlst",
+    maniacPickTarget: "Wähle das Opfer (kein Schutz kann dies verhindern)",
+    marionnettistePickTarget: "Wähle den Spieler, der deine Puppe sein wird",
+    marionnetteTag: " (Puppe)",
+
+    ultimateShield: "Ultimatives Schild",
+    ultimateShieldDesc:
+      "Schützt das gesamte Dorf in dieser Nacht vor Wölfen und Infektion. Einmalig nutzbar.",
+    ultimateShieldWarn:
+      "Achtung: Nach der Aktivierung verliert der Beschützer dauerhaft alle Schutzfähigkeiten.",
+    ultimateShieldActivate: "Ultimatives Schild aktivieren",
+    ultimateShieldConfirm: "Ja, aktivieren und Kräfte verlieren",
+    voteRanking: "Stimmen-Rangliste — Von den meisten bis zu den wenigsten Stimmen",
+
+    newWordPlaceholder: "Neues Wort…",
+    cancel: "Abbrechen",
+    roleWakeAlt: "{role} erwacht",
+
+    // GM Stars
+    starAward: "Stern an {name} vergeben",
+    starRemove: "Stern von {name} entfernen",
+    starsLabel: "Sterne",
+    starsHint:
+      "Klicke auf ⭐ auf der Karte eines Spielers, um scharfsinniges Kombinieren zu belohnen. Gedrückt halten zum Entfernen.",
+    starsEarned: "{n} ⭐",
+    badgeStarTown: "Meisterdetektiv",
+    badgeStarTownDesc: "Der Dorfbewohner mit den meisten Sternen vom Spielleiter.",
+    badgeStarWolf: "Meister der Täuschung",
+    badgeStarWolfDesc: "Der Wolf mit den meisten Sternen für gewiefte Manöver.",
+
+    // GM Guide
+    guideButton: "Leiter-Handbuch",
+    guideTitle: "Spielleiter-Handbuch",
+    guideStepOf: "Schritt {i} / {n}",
+    guideClose: "Handbuch schließen",
+    guideStart: "Los geht's!",
+
+    // Fox & Confidant — Joker mechanics
+    foxReveal: "🦊 Fuchs-Enthüllung",
+    foxRevealDesc:
+      "Der Fuchs verrät die nächtlichen Ereignisse öffentlich: sofortiger Selbstmord. Der Vertraute wird zum Joker.",
+    foxRevealConfirm: "Fuchs-Enthüllung bestätigen",
+    confidantReveal: "📜 Vertrauten-Enthüllung",
+    confidantRevealDesc:
+      "Der Vertraute verrät die Geheimnisse des Fuchses: sofortiger Selbstmord. Der Fuchs wird zum Joker.",
+    confidantRevealConfirm: "Vertrauten-Enthüllung bestätigen",
+    jokerAssignedToast: "{name} ist jetzt der Joker!",
+    foxRevealDoneToast: "{name} (Fuchs) eliminiert: Selbstmord. {confidant} wird zum Joker.",
+    confidantRevealDoneToast: "{name} (Vertrauter) eliminiert: Selbstmord. {fox} wird zum Joker.",
+
+    // GM Notes
+    gmNotesTitle: "Notizen des Spielleiters",
+    gmNotesShow: "Anzeigen",
+    gmNotesHide: "Verbergen",
+    gmNotesPlaceholder: "Notizen hier machen (z.B. Hinweise, Verdächtigungen, Allianzen)...",
+
+    // Guide modal — rules
+    guideRulesTitle: "Regeln & Spielleiter-Tipps",
+    guideRulesNight:
+      "Nacht: Folgt den Bildschirm-Aufrufen in der Reihenfolge. Jede Rolle führt ihre Aktion heimlich aus.",
+    guideRulesDawn:
+      "Morgendämmerung: Enthüllt den Nachtbericht und startet das Debattrad. Die Spieler sprechen reihum.",
+    guideRulesVote:
+      "Abstimmung: Folgt der Richtung des Rads, um die Wahl jedes Dorfbewohners fair zu sammeln.",
+    guideRulesUndo:
+      "Rückgängig-Button: Wenn ihr einen Eingabefehler macht, könnt ihr zurückkehren.",
+    guideCloseBtn: "Schließen",
+
+    // Defense timer
+    defenseTitle: "Verteidigungszeit ({n} Stimmen)",
+    defenseDesc: "{name} hat eine Minute, um sich zu verteidigen!",
+    pauseBtn: "Pause",
+    startBtn: "Start",
+    endDefense: "Verteidigung beenden",
+
+    // Penalty toasts
+    penaltyRemovedToast: "Strafe entfernt von {name}",
+    penaltyAddedToast: "Debatte-Strafe vergeben an {name}",
+
+    // Skip vote during first day voting
+    skipVoteDay1Vote: "Abstimmung überspringen (Tag 1)",
+    guideStep1Kicker: "Schritt 1",
+    guideStep1Title: "Setup & Spieler",
+    guideStep1Body:
+      "Gib die Namen aller Spieler ein und klicke auf '+ Spieler hinzufügen'. Wähle die Rollen-Zusammenstellung und den Timer aus.",
+    guideStep2Kicker: "Schritt 2",
+    guideStep2Title: "Verteilung & Geheime Rollen",
+    guideStep2Body:
+      "Reiche das Telefon weiter: Jeder sieht seine Karte geheim ein, prägt sie sich ein und deckt sie ab, bevor er weitergibt.",
+    guideStep3Kicker: "Schritt 3",
+    guideStep3Title: "Ablauf der Nacht",
+    guideStep3Body:
+      "Der Spielleiter weckt die Rollen nacheinander (Werwölfe, Seherin, Hexe...). Klicke auf ein Spielersymbol, um Aktionen auszuführen: Fressen, Retten, Sehen oder Stummschalten.",
+    guideStep4Kicker: "Schritt 4",
+    guideStep4Title: "Tag, Diskussion & Sterne ⭐",
+    guideStep4Body:
+      "Lies den Nachtbericht vor, lass den Hauptmann die Richtung wählen und drehe das Rad. Verstummte Spieler überspringen ihren Zug. Vergebe Sterne für kluge Schlüsse.",
+    guideStep5Kicker: "Schritt 5",
+    guideStep5Title: "Abstimmung & Elimination",
+    guideStep5Body:
+      "Trage die Stimmen ein. Die Hauptmannsstimme entscheidet bei Gleichstand, andernfalls gibt es eine Stichwahl. Der Tote enthüllt seine Rolle und löst Effekte aus.",
+    guideStep6Kicker: "Schritt 6",
+    guideStep6Title: "Spielende & Auswertung",
+    guideStep6Body:
+      "Bei Spielende zeigt die Auswertungskarte das Ranking der Spieler: Abstimmungsgenauigkeit, Rolleneffizienz, Sterne und Ehrentitel.",
+
+    // Orientation
+    rotateTitle: "Drehe dein Smartphone",
+    rotateText:
+      "Nightfall Oracle wird im Hochformat gespielt. Drehe dein Gerät ins Hochformat, um fortzufahren.",
+
+    // Missing keys — added for full localization
+    pass: "Zug überspringen",
+    witchLifePotion: "Lebenstrank",
+    witchLifeUsed: "Lebenstrank bereits verwendet",
+    witchSavingVictim: "Rettung von {name}",
+    witchSaveVictimPrompt: "{name} retten (Lebenstrank)",
+    nobodyAttacked: "Heute Nacht wurde niemand angegriffen.",
+    witchDeathPotion: "Gifttrank (Gift)",
+    witchDeathUsed: "Gifttrank bereits verwendet",
+    bwInfectingTarget: "Infiziere {name}",
+    bwInfectPrompt: "{name} infizieren (tritt dem Rudel bei statt zu sterben)",
+    bwNoVictimToInfect: "Kein Opfer zum Infizieren verfügbar.",
+    facesHealVictim: "{name} retten (Lebenstrank)",
+    facesNoVictimToHeal: "Kein Opfer zu retten",
+    facesSwitchPoison: "Zum Gifttrank wechseln",
+    bearLeftNeighbor: "Linker Nachbar",
+    bearRightNeighbor: "Rechter Nachbar",
+    bearStatusGrowling: "🐻 Der Bär KNURRT! (Mindestens 1 Wolf in der Nähe)",
+    bearStatusCalm: "🐻 Der Bär ist ruhig (Keine Wölfe in der Nähe)",
+    petiteFillePeek: "Die Werwölfe belauschen",
+    petiteFilleSleep: "Sicher weiterschlafen",
+    ultimateShieldToggle: "Ultimativen Schild aktivieren (Einmalig)",
+    hunterShotTitle: "Rache des Jägers",
+    hunterShotDesc: "{name} wurde eliminiert! Er kann einen letzten Spieler mit sich reißen.",
+    hunterFireConfirm: "Auf ausgewähltes Ziel schießen",
+    captainSuccessionTitle: "Nachfolge des Hauptmanns",
+    captainSuccessionDesc: "{name} ist gefallen und muss den neuen Hauptmann benennen.",
+    assignCaptainConfirm: "Hauptmannschaft übertragen",
+    dawnSummaryTitle: "Morgendämmerung-Zusammenfassung",
+    eventsTitle: "Nacht-Ereignisse",
+    skipDay1Vote: "Tag-1-Abstimmung überspringen (Optional)",
+  },
+  prompts: {
+    ...NEW_ROLE_LOCALES.de.prompts,
+    cupidon: "Bestimme die zwei Liebenden.",
+    mime: "Wähle den Spieler, dessen Rolle du kopierst.",
+    "enfant-sauvage": "Wähle dein Vorbild.",
+    geolier: "Wen sperrst du diese Nacht ein?",
+    voyante: "Welchen Spieler möchtest du durchschauen?",
+    salvateur: "Wen beschützt du diese Nacht? (Nicht dieselbe Person zweimal hintereinander)",
+    "petite-fille": "Du blinzelst kurz… Hast du das Rudel ausspioniert?",
+    "loup-garou": "Das Rudel bestimmt sein Opfer. Bei Uneinigkeit entscheidet der Urwolf alleine.",
+    "loup-noir":
+      "Infiziere das Opfer (einmal pro Spiel) und/oder bringe einen Spieler zum Schweigen.",
+    "loup-blanc": "Möchtest du diese Nacht einen Werwolf fressen?",
+    "loup-bavard":
+      "Der Spielleiter zeigt das Geheimwort: Es muss in der Morgendiskussion gesagt werden.",
+    sorciere: "Nutze deine Tränke.",
+    "joueur-de-flute": "Bezaubere zwei Spieler.",
+    corbeau: "Auf wen legst du die schwarze Feder?",
+    tavernier: "Wem gibst du einen aus?",
+    general:
+      "Bestimme den Spieler, auf den du schießen willst. Wenn er kein Wolf ist, verlierst du dein Leben.",
+    "montreur-dours": "Der Bär schnüffelt an seinen direkten Nachbarn…",
+    "trois-faces": "Wähle eines deiner drei Gesichter: Schutz, Trank oder Inspektion.",
+    voleur: "Stiehl die Rolle eines Spielers: Er wird zu einem einfachen Dorfbewohner.",
+    maniaque: "Bestimme das Opfer, das von keinem Schutz gerettet werden kann.",
+    marionnettiste:
+      "Bestimme deine Puppe. Wenn du angegriffen wirst, erleidet deine Puppe den Schaden an deiner Stelle und du verstummst während der Diskussion.",
+    renard: "Du erhältst einen vagen Bericht über die Ereignisse der Nacht.",
+  } as Record<string, string>,
+  teams: {
+    VILLAGEOIS: "Dorf",
+    WEREWOLVES: "Werwölfe",
+    SOLO: "Einzelgänger",
+    LOVERS: "Liebespaar",
+    DYNAMIC: "Dynamisch",
+  } as Record<string, string>,
+  roles: {
+    ...NEW_ROLE_LOCALES.de.roles,
+    marionnettiste: {
+      name: "Puppenspieler",
+      description:
+        "Du bindest dein Schicksal an eine Puppe. Wenn du nachts angegriffen wirst, erleidet deine Puppe den Schaden an deiner Stelle und du verstummst während der Morgendiskussion.",
+      power:
+        "Wähle eine Puppe. Wirst du angegriffen, fängt die Puppe den Schlag an deiner Stelle ab und du verstummst.",
+    },
+    renard: {
+      name: "Fuchs",
+      description:
+        "Der streifende Fuchs des Dorfes. Jede Nacht erhält er einen vagen Nachtbericht vom Spielleiter. In seiner letzten Nacht muss er einen Vertrauten wählen, um seine Geheimnisse zu teilen.",
+      power:
+        "Jede Nacht informiert der Spielleiter den Fuchs kurz über die Ereignisse. In seiner letzten Nacht ernennt er einen Vertrauten. Wenn einer die Informationen öffentlich preisgibt, wird er eliminiert und der andere wird zum JOKER.",
+    },
+  } as Record<string, { name: string; description: string; power: string }>,
+};
+
+export type UiKey = keyof typeof de.ui;
+export type Dictionary = typeof de;
