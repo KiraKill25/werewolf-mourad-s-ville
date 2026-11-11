@@ -201,6 +201,8 @@ export interface GameState {
   events: GameEvent[];
   /** Rapport nocturne du Maître du Jeu (jetons de narration) — remis à zéro chaque nuit. */
   nightReport: string[];
+  /** Blocks dawn events and victory until the GM confirms the night report. */
+  dawnReportPending?: boolean;
   /** ID du joueur devenu le Joker (mécanique Renard/Confident). */
   jokerId?: string;
   winnerTeam?: "VILLAGE" | "WOLVES" | "OTHER";
@@ -1512,7 +1514,14 @@ function resolveNight(state: GameState): GameState {
   });
   s.phase = "AUBE";
   s.day = s.night;
+  s.dawnReportPending = true;
   return checkVictory(s);
+}
+
+export function confirmNightReport(state: GameState): GameState {
+  const s = clone(state);
+  s.dawnReportPending = false;
+  return s.captainSuccessionPending ? s : checkVictory(s);
 }
 
 export function resolveHunter(state: GameState, targetId: string): GameState {
@@ -1667,7 +1676,7 @@ export function assignCaptain(state: GameState, targetId: string): GameState {
     s.log.push(nk("newCaptain", { name: next.name }));
   }
   s.captainSuccessionPending = undefined;
-  return s;
+  return s.phase === "AUBE" && !s.dawnReportPending ? checkVictory(s) : s;
 }
 
 export function skipVote(state: GameState): GameState {
@@ -1826,6 +1835,7 @@ export function startNight(state: GameState): GameState {
 
 export function checkVictory(state: GameState): GameState {
   const s = clone(state);
+  if (s.phase === "AUBE" && s.dawnReportPending) return s;
   const living = s.players.filter((p) => p.alive);
   if (living.length > 0 && (s.babyWolfPending?.length || s.hunterPending)) {
     if (s.phase !== "EVENEMENT_MORT") s.deathResumePhase = s.phase;
