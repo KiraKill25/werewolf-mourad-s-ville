@@ -201,6 +201,8 @@ export interface GameState {
   events: GameEvent[];
   /** Rapport nocturne du Maître du Jeu (jetons de narration) — remis à zéro chaque nuit. */
   nightReport: string[];
+  /** Blocks dawn events and victory until the GM confirms the night report. */
+  dawnReportPending?: boolean;
   /** ID du joueur devenu le Joker (mécanique Renard/Confident). */
   jokerId?: string;
   winnerTeam?: "VILLAGE" | "WOLVES" | "OTHER";
@@ -1512,7 +1514,15 @@ function resolveNight(state: GameState): GameState {
   });
   s.phase = "AUBE";
   s.day = s.night;
+  s.dawnReportPending = true;
   return checkVictory(s);
+}
+
+export function confirmNightReport(state: GameState): GameState {
+  const s = clone(state);
+  s.dawnReportPending = false;
+  if (!s.players.some((p) => p.alive)) return checkVictory(s);
+  return s.captainSuccessionPending ? s : checkVictory(s);
 }
 
 export function resolveHunter(state: GameState, targetId: string): GameState {
@@ -1533,6 +1543,7 @@ function resolveDeathAction(state: GameState, targetId: string, baby: boolean): 
     source.revengeUsed = true;
   } else s.hunterPending = undefined;
   killPlayer(s, targetId, baby ? "BABY_WOLF_REVENGE" : "HUNTER_SHOT");
+  if (!s.players.some((p) => p.alive)) return checkVictory(s);
   if (s.babyWolfPending?.length || s.hunterPending) return s;
   const resume = s.deathResumePhase ?? "AUBE";
   const nextNight = s.deathStartNextNight || resume === "JOUR_VOTE";
@@ -1540,6 +1551,7 @@ function resolveDeathAction(state: GameState, targetId: string, baby: boolean): 
   s.deathStartNextNight = undefined;
   s.phase = resume;
   if (resume.startsWith("NUIT")) return s.stepIndex >= s.steps.length ? resolveNight(s) : s;
+  if (resume === "AUBE" && s.captainSuccessionPending) return s;
   const checked = checkVictory(s);
   if (checked.phase === "FIN") return checked;
   return nextNight ? startNight(checked) : checked;
@@ -1667,7 +1679,7 @@ export function assignCaptain(state: GameState, targetId: string): GameState {
     s.log.push(nk("newCaptain", { name: next.name }));
   }
   s.captainSuccessionPending = undefined;
-  return s;
+  return s.phase === "AUBE" && !s.dawnReportPending ? checkVictory(s) : s;
 }
 
 export function skipVote(state: GameState): GameState {
@@ -1826,6 +1838,7 @@ export function startNight(state: GameState): GameState {
 
 export function checkVictory(state: GameState): GameState {
   const s = clone(state);
+  if (s.phase === "AUBE" && s.dawnReportPending) return s;
   const living = s.players.filter((p) => p.alive);
   if (living.length > 0 && (s.babyWolfPending?.length || s.hunterPending)) {
     if (s.phase !== "EVENEMENT_MORT") s.deathResumePhase = s.phase;

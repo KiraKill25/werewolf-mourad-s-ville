@@ -16,6 +16,7 @@ import { pt } from "./locales/pt";
 import { ru } from "./locales/ru";
 import { de } from "./locales/de";
 import { ROLE_BY_ID } from "@/data/roles";
+import { NIGHT_PICKER_LOCALES, type NightPickerKey } from "./locales/night-picker";
 
 export type Lang = "fr" | "en" | "ar" | "es" | "zh" | "pt" | "ru" | "de";
 
@@ -40,7 +41,7 @@ type PartialDictionary = {
 
 const DICTS: Record<Lang, PartialDictionary> = { fr, en, ar, es, zh, pt, ru, de };
 
-export type TranslationKey = UiKey;
+export type TranslationKey = UiKey | NightPickerKey;
 
 const KEY = "mvno-lang";
 
@@ -54,7 +55,7 @@ interface Ctx {
   lang: Lang;
   setLang: (l: Lang) => void;
   /** Traduction d'une clé d'interface, avec variables {x}. */
-  t: (k: UiKey, vars?: Record<string, string | number>) => string;
+  t: (k: TranslationKey, vars?: Record<string, string | number>) => string;
   /** Nom / description / pouvoir traduits d'un rôle. */
   role: (id: string) => RoleText;
   /** Nom traduit d'un rôle (raccourci). */
@@ -69,6 +70,11 @@ interface Ctx {
 function interpolate(s: string, vars?: Record<string, string | number>) {
   if (!vars) return s;
   return s.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? String(vars[k]) : m));
+}
+
+function uiText(lang: Lang, key: TranslationKey) {
+  const copy: Partial<Record<TranslationKey, string>> = { ...fr.ui, ...DICTS[lang].ui, ...NIGHT_PICKER_LOCALES[lang] };
+  return copy[key] ?? key;
 }
 
 function roleTextFor(lang: Lang, id: string): RoleText {
@@ -139,7 +145,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     return {
       lang,
       setLang,
-      t: (k, vars) => interpolate(dict.ui?.[k] ?? fr.ui[k] ?? String(k), vars),
+      t: (k, vars) => interpolate(uiText(lang, k), vars),
       role: (id) => roleTextFor(lang, id),
       roleName: (id) => roleTextFor(lang, id).name,
       prompt: (id) => dict.prompts?.[id] ?? fr.prompts[id] ?? "",
@@ -171,7 +177,7 @@ export const useI18n = (): Ctx => {
   return {
     lang: activeLang,
     setLang: setGlobalLang,
-    t: (k, vars) => interpolate(dict.ui?.[k] ?? fr.ui[k] ?? String(k), vars),
+    t: (k, vars) => interpolate(uiText(activeLang, k), vars),
     role: (id) => roleTextFor(activeLang, id),
     roleName: (id) => roleTextFor(activeLang, id).name,
     prompt: (id) => dict.prompts?.[id] ?? fr.prompts[id] ?? "",

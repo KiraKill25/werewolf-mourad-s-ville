@@ -15,3 +15,5 @@
 
 - Engine rule tests use a separate Vitest configuration with the same source alias, keeping the app runtime plugins out of unit tests.
 - End-of-game scoring lives in the pure module src/game/evaluation.ts (tested), and both the recap MVP and the evaluation screen read from it so rankings never disagree.
+- Dawn report confirmation is persisted in game state and gates death dispatch and victory, so a reload cannot bypass the report-first sequence.
+- Night picker eligibility and status derive from the pure night-options module; eligibility never removes living players from the GM overview.
