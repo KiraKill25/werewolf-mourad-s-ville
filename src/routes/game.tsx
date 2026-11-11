@@ -59,6 +59,7 @@ import {
   assignCaptain,
   bearNeighbors,
   canWitchHeal,
+  confirmNightReport,
   confidantReveal,
   createGame,
   currentStep,
@@ -77,6 +78,8 @@ import {
   type GameState,
   type Player,
 } from "@/game/engine";
+
+import { nightReason, nightStatuses, type NightAction } from "@/game/night-options";
 
 const TITLE = "Partie en cours — Nightfall Oracle";
 const DESC = "Le meneur guide la nuit, l'aube et le vote du village, tour après tour.";
@@ -255,8 +258,9 @@ function GamePage() {
     !state.reveal &&
     !transition &&
     !victims;
-  const successionWaitsForReport =
-    !!state.captainSuccessionPending && state.phase === "AUBE" && reportDay !== state.day;
+  const flowReady = !state.reveal && !transition && !victims;
+  const needsSuccession = !!state.captainSuccessionPending && !needsNightReport && flowReady;
+  const needsDeathEvent = state.phase === "EVENEMENT_MORT" && !needsNightReport && !needsSuccession && flowReady;
   const needsDebateSetup =
     !isNight &&
     state.phase === "AUBE" &&
@@ -385,7 +389,17 @@ function GamePage() {
       )}
 
       {needsNightReport && (
-        <NightReportCard state={state} onClose={() => setReportDay(state.day)} />
+        <NightReportCard state={state} onClose={() => {
+          setReportDay(state.day);
+          updateState(confirmNightReport(state));
+        }} />
+      )}
+
+      {needsSuccession && <CaptainSuccessionPanel state={state} onDone={updateState} />}
+      {needsDeathEvent && (
+        state.babyWolfPending?.length
+          ? <BabyWolfPanel state={state} onDone={updateState} />
+          : <HunterPanel state={state} onDone={updateState} />
       )}
 
       {needsDebateSetup && (
@@ -441,20 +455,12 @@ function GamePage() {
         />
       )}
 
-      {state.phase === "EVENEMENT_MORT" ? (
-        state.babyWolfPending?.length ? (
-          <BabyWolfPanel state={state} onDone={updateState} />
-        ) : (
-          <HunterPanel state={state} onDone={updateState} />
-        )
-      ) : state.captainSuccessionPending && !successionWaitsForReport ? (
-        <CaptainSuccessionPanel state={state} onDone={setState} />
-      ) : state.phase === "AUBE" ? (
+      {state.phase === "AUBE" ? (
         <DawnPanel
           state={state}
           settings={settings}
           direction={direction}
-          setupDone={directionDay === state.day}
+          setupDone={directionDay === state.day && !needsNightReport && !needsSuccession}
           debateDone={debateDoneDay === state.day}
           onDebateDone={() => {
             setDebateDoneDay(state.day);
@@ -489,9 +495,9 @@ function GamePage() {
             onRemovePenalty={removePenalty}
           />
         ) : null
-      ) : (
+      ) : isNight ? (
         <NightPanel state={state} onChange={updateState} onUndo={undo} canUndo={canUndo} />
-      )}
+      ) : null}
 
       {/* Bloc de notes privées pour le Meneur */}
       <section className="surface-card rounded-2xl p-4">
@@ -753,6 +759,8 @@ function PlayerPicker({
   accent = "arcane",
   marks,
   disabledIds,
+  reasons,
+  status,
 }: {
   players: Player[];
   selected: string[];
@@ -760,6 +768,8 @@ function PlayerPicker({
   accent?: PickerAccent;
   marks?: Record<string, React.ReactNode>;
   disabledIds?: string[];
+  reasons?: Record<string, ReturnType<typeof nightReason>>;
+  status?: GameState;
 }) {
   const { t, roleName } = useI18n();
   return (
@@ -768,13 +778,15 @@ function PlayerPicker({
         const rid = p.originalRoleId ?? effectiveRoleId(p);
         const wolfSide = p.team === "WEREWOLVES" || p.isConvertedToWolf;
         const solo = ROLE_BY_ID[rid]?.team === "SOLO";
-        const off = disabledIds?.includes(p.id) ?? false;
+        const off = (disabledIds?.includes(p.id) ?? false) || !!reasons?.[p.id];
+        const chips = status ? nightStatuses(status, p) : undefined;
         return (
-          <button
+          <Button
+            variant="outline"
             key={p.id}
             disabled={off}
             onClick={() => onToggle(p.id)}
-            className={`relative rounded-xl border px-3 py-3 text-sm transition duration-300 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 ${
+            className={`relative block h-auto min-h-24 w-full whitespace-normal rounded-lg border px-3 py-3 text-sm transition duration-300 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 ${
               selected.includes(p.id) && !off ? PICKER_ACCENT[accent] : "border-border"
             }`}
           >
@@ -807,6 +819,13 @@ function PlayerPicker({
                 </span>
               )}
             </span>
+            <span className="mt-2 flex flex-wrap justify-center gap-1 text-[10px] leading-relaxed">
+              {chips?.protected && <span className="rounded border border-primary/40 bg-primary/10 px-1.5 text-foreground">🛡️ {t("protectedStatus")}</span>}
+              {chips?.immune && <span className="rounded border border-accent/40 bg-accent/10 px-1.5 text-foreground">🛸 {t("immune")}</span>}
+              {p.doused && <span className="rounded border border-destructive/40 px-1.5 text-foreground">🔥 {t("fuelStatus")}</span>}
+              {chips?.frozen && <span className="rounded border border-border px-1.5 text-foreground">❄️ {t("frozenStatus")}</span>}
+              {reasons?.[p.id] && <span className="rounded bg-muted px-1.5 font-semibold text-foreground">{reasons[p.id] === "alreadyProtected" ? "🛡️ " : ""}{t(reasons[p.id] ?? "unavailable")}</span>}
+            </span>
             <span className="mt-0.5 flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
               <span
                 className={`size-1.5 rounded-full ${wolfSide ? "bg-destructive" : solo ? "bg-accent" : "bg-primary"}`}
@@ -814,7 +833,7 @@ function PlayerPicker({
               {roleName(rid)}
               {p.isConvertedToWolf && t("converted")}
             </span>
-          </button>
+          </Button>
         );
       })}
     </div>
@@ -928,37 +947,17 @@ function NightPanel({
       </NarratorCard>
     );
   }
-  let candidates = state.players.filter((p) => p.alive);
-  if (step.roleId === "loup-blanc")
-    candidates = step.soloKill
-      ? candidates.filter((p) => p.id !== actor.id)
-      : candidates.filter((p) => p.team === "WEREWOLVES" && p.id !== actor.id);
-
-  if (step.roleId === "salvateur") {
-    // Rotation cyclique : un joueur déjà protégé dans le cycle est indisponible,
-    // le Salvateur peut se protéger lui-même, et le cycle repart quand tout le
-    // monde a été protégé une fois.
-    const history = actor.protectedHistory ?? [];
-    const remaining = candidates.filter((p) => !history.includes(p.id));
-    if (remaining.length > 0) candidates = remaining;
-  }
-  if (
-    [
-      "voyante",
-      "cupidon",
-      "mime",
-      "enfant-sauvage",
-      "general",
-      "voleur",
-      "maniaque",
-      "loup-rouge",
-      "pyromaniac",
-      "alien",
-    ].includes(step.roleId)
-  )
-    candidates = candidates.filter((p) => p.id !== actor.id);
-
-  if (step.roleId === "pyromaniac") candidates = candidates.filter((p) => !p.doused);
+  const candidates = state.players.filter((p) => p.alive);
+  const NightPlayerPicker = ({ action = "default", ...props }: React.ComponentProps<typeof PlayerPicker> & { action?: NightAction }) => {
+    const reasons = Object.fromEntries(candidates.map((p) => [p.id,
+      props.disabledIds?.includes(p.id)
+        ? (action === "mute" ? "alreadyMuted" : "packMember")
+        : !props.players.some((candidate) => candidate.id === p.id)
+          ? "selfTarget"
+          : nightReason(state, step, actor, p, action),
+    ]));
+    return <PlayerPicker {...props} players={candidates} reasons={reasons} status={state} />;
+  };
 
   const toggle = (id: string) =>
     setSel((s) =>
@@ -1062,6 +1061,9 @@ function NightPanel({
       )}
 
       <div className="space-y-4 p-5">
+        {(["info", "yesno", "bear"].includes(step.mode) || (step.mode === "word" && !step.soloKill) || shieldConfirm || ignite || (step.mode === "threefaces" && (!facePower || facePower === "life")) || (step.mode === "blackwolf" && !step.soloKill && bwTab !== "mute")) && (
+          <NightPlayerPicker action="overview" players={candidates} selected={[]} onToggle={() => {}} />
+        )}
         <div className="space-y-1 rounded-2xl border border-primary/30 bg-primary/5 p-3">
           <p className="text-[10px] tracking-[0.25em] text-primary uppercase">
             {t("gmTurnGuide", { role: roleName(step.roleId), name: actor.name })}
@@ -1076,7 +1078,7 @@ function NightPanel({
                 <p className="text-xs tracking-widest text-primary uppercase">
                   {t("noirSoloVictimTitle")}
                 </p>
-                <PlayerPicker
+                <NightPlayerPicker
                   players={candidates.filter((p) => p.id !== actor.id)}
                   selected={sel}
                   onToggle={toggleTarget}
@@ -1160,7 +1162,7 @@ function NightPanel({
             <p className="text-xs font-bold text-accent">
               {t("alienCharges", { n: 3 - (actor.alienErrors ?? 0) })}
             </p>
-            <PlayerPicker players={candidates} selected={sel} onToggle={toggle} accent="arcane" />
+            <NightPlayerPicker players={candidates} selected={sel} onToggle={toggle} accent="arcane" />
             <label className="block space-y-1 text-xs font-semibold text-muted-foreground">
               {t("alienGuessRole")}
               <select
@@ -1198,7 +1200,7 @@ function NightPanel({
           </div>
         ) : step.mode === "wolves" ? (
           <div className="space-y-3">
-            <PlayerPicker
+            <NightPlayerPicker
               players={candidates}
               selected={sel}
               onToggle={toggleTarget}
@@ -1303,7 +1305,7 @@ function NightPanel({
                 )}
 
                 {tab === "attack" && (
-                  <PlayerPicker
+                  <NightPlayerPicker
                     players={candidates.filter((p) => p.id !== actor.id)}
                     selected={sel}
                     onToggle={(id) => {
@@ -1318,8 +1320,9 @@ function NightPanel({
 
                 {tab === "infect" &&
                   (step.soloKill ? (
-                    <PlayerPicker
+                    <NightPlayerPicker
                       players={candidates.filter((p) => p.id !== actor.id)}
+                      action="infect"
                       selected={infect && sel[0] ? [sel[0]] : []}
                       disabledIds={forbiddenWolfIds}
                       onToggle={(id) => {
@@ -1354,8 +1357,9 @@ function NightPanel({
                   ))}
 
                 {tab === "mute" && (
-                  <PlayerPicker
+                  <NightPlayerPicker
                     players={candidates}
+                    action="mute"
                     selected={mute ? [mute] : []}
                     onToggle={(id) => setMute((cur) => (cur === id ? null : id))}
                     disabledIds={state.round.previousMutedId ? [state.round.previousMutedId] : []}
@@ -1434,7 +1438,7 @@ function NightPanel({
             </div>
 
             {facePower === "protect" && (
-              <PlayerPicker
+              <NightPlayerPicker action="protect"
                 players={candidates}
                 selected={sel}
                 onToggle={toggleTarget}
@@ -1442,7 +1446,7 @@ function NightPanel({
               />
             )}
             {facePower === "inspect" && (
-              <PlayerPicker
+              <NightPlayerPicker
                 players={candidates.filter((p) => p.id !== actor.id)}
                 selected={sel}
                 onToggle={toggleTarget}
@@ -1469,7 +1473,7 @@ function NightPanel({
               </div>
             )}
             {facePower === "poison" && (
-              <PlayerPicker
+              <NightPlayerPicker
                 players={candidates.filter((p) => p.id !== actor.id)}
                 selected={sel}
                 onToggle={toggleTarget}
@@ -1529,7 +1533,7 @@ function NightPanel({
               {actor.hasUsedDeathPotion || actor.poisonUsed ? (
                 <p className="text-xs text-muted-foreground">{t("witchDeathUsed")}</p>
               ) : (
-                <PlayerPicker
+                <NightPlayerPicker
                   players={candidates.filter((p) => p.id !== actor.id)}
                   selected={sel}
                   onToggle={toggleTarget}
@@ -1643,7 +1647,7 @@ function NightPanel({
               </p>
             )}
             <p className="text-sm text-muted-foreground">{t("renardChooseConfidant")}</p>
-            <PlayerPicker
+            <NightPlayerPicker
               players={candidates.filter((p) => p.id !== actor.id)}
               selected={sel}
               onToggle={toggle}
@@ -1698,7 +1702,7 @@ function NightPanel({
             )}
 
             {!shieldConfirm && !ignite && (
-              <PlayerPicker
+              <NightPlayerPicker
                 players={candidates}
                 selected={sel}
                 onToggle={toggleTarget}
@@ -1752,7 +1756,7 @@ function HunterPanel({ state, onDone }: { state: GameState; onDone: (s: GameStat
   const aliveCandidates = state.players.filter((p) => p.alive);
 
   return (
-    <div className="surface-card animate-rise-in neon-ring space-y-4 rounded-3xl p-5">
+    <OverlayCard tone="WOLF" label={t("hunterShotTitle")}>
       <div className="flex items-center gap-3 text-destructive">
         <Flame className="size-6 animate-pulse" />
         <h2 className="text-lg font-black uppercase">{t("hunterShotTitle")}</h2>
@@ -1768,14 +1772,14 @@ function HunterPanel({ state, onDone }: { state: GameState; onDone: (s: GameStat
         accent="crimson"
       />
 
-      <button
+      <Button
         disabled={!targetId}
         onClick={() => targetId && onDone(resolveHunter(state, targetId))}
         className="w-full rounded-full bg-destructive py-3 font-bold text-destructive-foreground transition active:scale-95 disabled:opacity-40"
       >
         {t("hunterFireConfirm")}
-      </button>
-    </div>
+      </Button>
+    </OverlayCard>
   );
 }
 
@@ -1886,7 +1890,7 @@ function BabyWolfPanel({ state, onDone }: { state: GameState; onDone: (s: GameSt
   const [targetId, setTargetId] = useState<string | null>(null);
   const wolf = state.players.find((p) => p.id === state.babyWolfPending?.[0]);
   return (
-    <div className="surface-card animate-rise-in neon-ring space-y-4 rounded-3xl p-5">
+    <OverlayCard tone="WOLF" label={t("babyRevengeTitle")}>
       <div className="flex items-center gap-3 text-destructive">
         <img src={roleImage("bébé-loup")} alt="" className="size-10 rounded-xl object-cover" />
         <h2 className="text-lg font-black uppercase">{t("babyRevengeTitle")}</h2>
@@ -1907,7 +1911,7 @@ function BabyWolfPanel({ state, onDone }: { state: GameState; onDone: (s: GameSt
       >
         {t("babyRevengeConfirm")}
       </Button>
-    </div>
+    </OverlayCard>
   );
 }
 
@@ -1924,7 +1928,7 @@ function CaptainSuccessionPanel({
   const aliveCandidates = state.players.filter((p) => p.alive);
 
   return (
-    <div className="surface-card animate-rise-in neon-ring space-y-4 rounded-3xl p-5">
+    <OverlayCard tone="DAY" label={t("captainSuccessionTitle")}>
       <div className="flex items-center gap-3 text-amber-400">
         <Crown className="size-6 animate-bounce" />
         <h2 className="text-lg font-black uppercase">{t("captainSuccessionTitle")}</h2>
@@ -1940,14 +1944,14 @@ function CaptainSuccessionPanel({
         accent="arcane"
       />
 
-      <button
+      <Button
         disabled={!targetId}
         onClick={() => targetId && onDone(assignCaptain(state, targetId))}
         className="w-full rounded-full bg-primary py-3 font-bold text-primary-foreground transition active:scale-95 disabled:opacity-40"
       >
         {t("assignCaptainConfirm")}
-      </button>
-    </div>
+      </Button>
+    </OverlayCard>
   );
 }
 
