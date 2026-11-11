@@ -254,7 +254,7 @@ function GamePage() {
   const needsNightReport =
     !isNight &&
     state.phase === "AUBE" &&
-    reportDay !== state.day &&
+    (state.dawnReportPending ?? reportDay !== state.day) &&
     !state.reveal &&
     !transition &&
     !victims;
@@ -1339,7 +1339,8 @@ function NightPanel({
                       marks={marks}
                     />
                   ) : victim ? (
-                    <button
+                    <Button
+                      disabled={!!nightReason(state, step, actor, victim, "infect")}
                       onClick={() => setInfect((v) => !v)}
                       className={`flex w-full items-center justify-center gap-2 rounded-xl border p-4 text-sm font-bold transition ${
                         infect
@@ -1351,7 +1352,7 @@ function NightPanel({
                       {infect
                         ? t("bwInfectingTarget", { name: victim.name })
                         : t("bwInfectPrompt", { name: victim.name })}
-                    </button>
+                    </Button>
                   ) : (
                     <p className="text-xs text-muted-foreground">{t("bwNoVictimToInfect")}</p>
                   ))}

@@ -1521,6 +1521,7 @@ function resolveNight(state: GameState): GameState {
 export function confirmNightReport(state: GameState): GameState {
   const s = clone(state);
   s.dawnReportPending = false;
+  if (!s.players.some((p) => p.alive)) return checkVictory(s);
   return s.captainSuccessionPending ? s : checkVictory(s);
 }
 
@@ -1542,6 +1543,7 @@ function resolveDeathAction(state: GameState, targetId: string, baby: boolean): 
     source.revengeUsed = true;
   } else s.hunterPending = undefined;
   killPlayer(s, targetId, baby ? "BABY_WOLF_REVENGE" : "HUNTER_SHOT");
+  if (!s.players.some((p) => p.alive)) return checkVictory(s);
   if (s.babyWolfPending?.length || s.hunterPending) return s;
   const resume = s.deathResumePhase ?? "AUBE";
   const nextNight = s.deathStartNextNight || resume === "JOUR_VOTE";
@@ -1549,6 +1551,7 @@ function resolveDeathAction(state: GameState, targetId: string, baby: boolean): 
   s.deathStartNextNight = undefined;
   s.phase = resume;
   if (resume.startsWith("NUIT")) return s.stepIndex >= s.steps.length ? resolveNight(s) : s;
+  if (resume === "AUBE" && s.captainSuccessionPending) return s;
   const checked = checkVictory(s);
   if (checked.phase === "FIN") return checked;
   return nextNight ? startNight(checked) : checked;
