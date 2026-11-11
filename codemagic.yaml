@@ -1,0 +1,52 @@
+workflows:
+  android-apk:
+    name: Android APK (Mourad's Ville Omega)
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      java: 17
+      node: 22
+      vars:
+        JAVA_TOOL_OPTIONS: "-Xmx4g"
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install --legacy-peer-deps
+          npm install @capacitor/android @capacitor/keyboard @capacitor/assets
+
+      - name: Build web assets
+        script: |
+          npm run build:mobile || npm run build
+
+      - name: Generate fresh Android native project
+        script: |
+          if [ ! -d "android" ]; then npx cap add android; fi
+          npx cap sync android
+
+      - name: Generate native Android icons from public folder
+        script: |
+          mkdir -p assets
+          if [ -f "public/icon.png" ]; then
+            cp public/icon.png assets/logo.png
+            cp public/icon.png assets/icon-only.png
+            npx @capacitor/assets generate --android
+          fi
+
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+
+      - name: Build APK
+        script: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+    artifacts:
+      - android/app/build/outputs/apk/**/*.apk
+    publishing:
+      email:
+        recipients:
+          - kirakill25@users.noreply.github.com
+        notify:
+          success: "true"
+          failure: "true"
