@@ -45,7 +45,7 @@ import { useI18n } from "@/lib/i18n";
 import { useNarrate } from "@/hooks/use-narrate";
 import { nk } from "@/lib/narration";
 import { NightReportCard } from "@/components/NightReportCard";
-import { clearBgm, playCheer, playWolfHowl, speakRole, startBgm } from "@/lib/audio";
+import { clearBgm, playCheer, playWolfHowl, startBgm } from "@/lib/audio";
 import {
   clearGame,
   loadGame,
@@ -259,7 +259,7 @@ function GamePage() {
     !transition &&
     !victims;
   const flowReady = !state.reveal && !transition && !victims;
-  const needsSuccession = !!state.captainSuccessionPending && !needsNightReport && flowReady;
+  const needsSuccession = !isNight && !!state.captainSuccessionPending && !needsNightReport && flowReady;
   const needsDeathEvent = state.phase === "EVENEMENT_MORT" && !needsNightReport && !needsSuccession && flowReady;
   const needsDebateSetup =
     !isNight &&
@@ -886,30 +886,7 @@ function NightPanel({
     setGuessRole("");
   }, [step?.key]);
 
-  useEffect(() => {
-    if (!step) return undefined;
-    const WOLF_ROLES = [
-      "loup-garou",
-      "loup-noir",
-      "loup-blanc",
-      "loup-matriarche",
-      "loup-bavard",
-      "loup-rouge",
-      "bébé-loup",
-    ];
-    if (WOLF_ROLES.includes(step.roleId)) playWolfHowl();
-    if (step.mode === "wolves") {
-      const id = window.setTimeout(() => {
-        try {
-          speakRole(WOLF_CALL[lang] ?? WOLF_CALL.fr, SPEECH_LANG[lang] ?? "fr-FR");
-        } catch (e) {
-          console.error(e);
-        }
-      }, 1200);
-      return () => window.clearTimeout(id);
-    }
-    return undefined;
-  }, [step?.key]);
+  // Night actions stay silent (no SFX/voice); only the ambient night music plays.
 
   if (!step) {
     return (
@@ -1829,60 +1806,55 @@ function PreVotePanel({ state, onDone }: { state: GameState; onDone: (s: GameSta
             ? [...cur, id]
             : [cur[1], id],
     );
-  const confirm = () => {
-    let next = state;
-    if (jailor && jailId) next = applyJailor(next, jailId);
-    if (raven && ravenIds.length) next = applyRaven(next, ravenIds);
-    onDone(next);
+  const [stage, setStage] = useState<"jail" | "raven">(jailor ? "jail" : "raven");
+  const [afterJail, setAfterJail] = useState<GameState>(state);
+  const finishJail = (next: GameState) => {
+    if (raven) {
+      setAfterJail(next);
+      setStage("raven");
+    } else onDone(next);
   };
+  const finishRaven = (apply: boolean) =>
+    onDone(apply && raven && ravenIds.length ? applyRaven(afterJail, ravenIds) : afterJail);
+  const isJail = stage === "jail" && !!jailor;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/90 p-4">
-      <div className="surface-card neon-ring mx-auto w-full max-w-md space-y-5 rounded-3xl p-5">
-        <h2 className="text-center font-horror text-2xl font-black text-primary">{tx.title}</h2>
-        {jailor && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <img src={roleImage("geolier")} alt="" className="size-9 rounded-xl object-cover" />
-              <p className="text-sm font-bold">{tx.jail}</p>
-            </div>
-            <PlayerPicker
-              players={alive.filter((p) => p.id !== state.round.previousJailedId)}
-              selected={jailId ? [jailId] : []}
-              onToggle={(id) => setJailId((c) => (c === id ? null : id))}
-              accent="arcane"
-            />
-          </div>
-        )}
-        {raven && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <img src={roleImage("corbeau")} alt="" className="size-9 rounded-xl object-cover" />
-              <p className="text-sm font-bold">{tx.raven.replace("{n}", String(ravenMax))}</p>
-            </div>
-            <PlayerPicker
-              players={alive}
-              selected={ravenIds}
-              onToggle={toggleRaven}
-              accent="crimson"
-            />
-          </div>
-        )}
-        <div className="flex gap-2">
-          <button
-            onClick={() => onDone(state)}
-            className="flex-1 rounded-full border border-border py-3 text-xs font-semibold text-muted-foreground"
-          >
-            {tx.skip}
-          </button>
-          <button
-            onClick={confirm}
-            className="flex-1 rounded-full bg-primary py-3 font-bold text-primary-foreground transition active:scale-95"
-          >
-            {tx.confirm}
-          </button>
+    <OverlayCard tone="DAY" label={tx.title}>
+      <h2 className="text-center font-horror text-2xl font-black text-primary">{tx.title}</h2>
+      <div className="space-y-2 text-start">
+        <div className="flex items-center gap-2">
+          <img src={roleImage(isJail ? "geolier" : "corbeau")} alt="" className="size-9 rounded-xl object-cover" />
+          <p className="text-sm font-bold">
+            {isJail ? tx.jail : tx.raven.replace("{n}", String(ravenMax))}
+          </p>
         </div>
+        {isJail ? (
+          <PlayerPicker
+            players={alive.filter((p) => p.id !== state.round.previousJailedId)}
+            selected={jailId ? [jailId] : []}
+            onToggle={(id) => setJailId((c) => (c === id ? null : id))}
+            accent="arcane"
+          />
+        ) : (
+          <PlayerPicker players={alive} selected={ravenIds} onToggle={toggleRaven} accent="crimson" />
+        )}
       </div>
-    </div>
+      <div className="flex gap-2">
+        <button
+          onClick={() => (isJail ? finishJail(state) : finishRaven(false))}
+          className="flex-1 rounded-full border border-border py-3 text-xs font-semibold text-muted-foreground"
+        >
+          {tx.skip}
+        </button>
+        <button
+          onClick={() =>
+            isJail ? finishJail(jailId ? applyJailor(state, jailId) : state) : finishRaven(true)
+          }
+          className="flex-1 rounded-full bg-primary py-3 font-bold text-primary-foreground transition active:scale-95"
+        >
+          {tx.confirm}
+        </button>
+      </div>
+    </OverlayCard>
   );
 }
 
