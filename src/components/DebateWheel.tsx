@@ -1,3 +1,4 @@
+import { MicButton } from "@/components/MicButton";
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play, Plus, RotateCcw, SkipForward } from "lucide-react";
 import { playTimeUpAlert } from "@/lib/audio";
@@ -453,6 +454,8 @@ export function DebateWheel({
           }
         />
       </div>
+
+      <MicButton key={`mic-${i}`} large />
 
       <div className="grid grid-cols-2 gap-2">
         <button
