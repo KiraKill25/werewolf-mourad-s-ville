@@ -1925,6 +1925,7 @@ export function checkVictory(state: GameState): GameState {
 
 export function canWitchHeal(s: GameState): boolean {
   if (!s.round.attackedId) return false;
+  if (s.round.villageShield || s.round.attackedId === s.round.protectedId) return false;
   const victim = s.players.find((p) => p.id === s.round.attackedId);
   if (
     victim &&
