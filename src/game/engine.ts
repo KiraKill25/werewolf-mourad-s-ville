@@ -1509,9 +1509,6 @@ function resolveNight(state: GameState): GameState {
   s.players
     .filter((p) => p.alive && p.doused)
     .forEach((p) => s.dawnSummary.push(nk("fuelNotice", { name: p.name })));
-  s.players.forEach((p) => {
-    p.frozenNight = undefined;
-  });
   s.phase = "AUBE";
   s.day = s.night;
   s.dawnReportPending = true;
@@ -1566,7 +1563,8 @@ export function preVoteActor(s: GameState, roleId: "geolier" | "corbeau"): Playe
       effectiveRoleId(p) === roleId &&
       !p.powersDisabled &&
       !p.hasLostPower &&
-      !p.disabledNightAbility,
+      !p.disabledNightAbility &&
+      p.frozenNight !== s.day,
   );
 }
 
