@@ -3,7 +3,7 @@ import { ScrollText } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useNarrate } from "@/hooks/use-narrate";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
-import { clearBgm, startBgm } from "@/lib/audio";
+import { clearBgm } from "@/lib/audio";
 import { roleImage } from "@/data/roles";
 import type { GameState } from "@/game/engine";
 
@@ -66,7 +66,6 @@ export function NightReportCard({ state, onClose }: { state: GameState; onClose:
   }, []);
 
   const close = () => {
-    startBgm("DAY");
     onClose();
   };
 

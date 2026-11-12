@@ -1,13 +1,13 @@
-const keys = ["selfTarget", "alreadyProtected", "alreadyDoused", "nonWolf", "packMember", "alreadyMuted", "immune", "unavailable", "protectedStatus"] as const;
+const keys = ["selfTarget", "alreadyProtected", "alreadyDoused", "nonWolf", "packMember", "alreadyMuted", "immune", "unavailable", "protectedStatus", "micOn", "micOff", "micLive", "micDenied", "gmViewShow", "gmViewHide"] as const;
 const rows = {
-  fr: ["Soi-même interdit", "Déjà protégé", "Déjà imbibé", "Non-loup", "Membre de la meute", "Déjà muselé", "Immunisé", "Non sélectionnable", "Protégé"],
-  en: ["Cannot target self", "Already protected", "Already doused", "Not a wolf", "Pack member", "Already muted", "Immune", "Not selectable", "Protected"],
-  ar: ["لا يمكن استهداف النفس", "محمي سابقاً", "مبلل بالوقود سابقاً", "ليس ذئباً", "عضو القطيع", "أُسكت سابقاً", "محصّن", "غير قابل للاختيار", "محمي"],
-  es: ["No puedes elegirte", "Ya protegido", "Ya rociado", "No es lobo", "Miembro de la manada", "Ya silenciado", "Inmune", "No seleccionable", "Protegido"],
-  pt: ["Não pode escolher-se", "Já protegido", "Já encharcado", "Não é lobo", "Membro da alcateia", "Já silenciado", "Imune", "Não selecionável", "Protegido"],
-  de: ["Kein Selbstziel", "Bereits geschützt", "Bereits übergossen", "Kein Wolf", "Rudelmitglied", "Bereits stumm", "Immun", "Nicht wählbar", "Geschützt"],
-  ru: ["Нельзя выбрать себя", "Уже защищён", "Уже облит", "Не волк", "Член стаи", "Уже лишён речи", "Неуязвим", "Недоступен для выбора", "Защищён"],
-  zh: ["不能选择自己", "已保护过", "已浇油", "非狼人", "狼群成员", "已禁言", "免疫", "不可选择", "受保护"],
+  fr: ["Soi-même interdit", "Déjà protégé", "Déjà imbibé", "Non-loup", "Membre de la meute", "Déjà muselé", "Immunisé", "Non sélectionnable", "Protégé", "Ouvrir le micro", "Couper le micro", "Micro actif — parlez", "Micro refusé ou indisponible", "Vue MJ", "Vue joueurs"],
+  en: ["Cannot target self", "Already protected", "Already doused", "Not a wolf", "Pack member", "Already muted", "Immune", "Not selectable", "Protected", "Open mic", "Close mic", "Mic live — speak", "Mic denied or unavailable", "GM view", "Player view"],
+  ar: ["لا يمكن استهداف النفس", "محمي سابقاً", "مبلل بالوقود سابقاً", "ليس ذئباً", "عضو القطيع", "أُسكت سابقاً", "محصّن", "غير قابل للاختيار", "محمي", "فتح الميكروفون", "إغلاق الميكروفون", "الميكروفون يعمل — تكلم", "الميكروفون مرفوض أو غير متاح", "عرض المنشط", "عرض اللاعبين"],
+  es: ["No puedes elegirte", "Ya protegido", "Ya rociado", "No es lobo", "Miembro de la manada", "Ya silenciado", "Inmune", "No seleccionable", "Protegido", "Abrir micro", "Cerrar micro", "Micro activo — habla", "Micro denegado o no disponible", "Vista DJ", "Vista jugadores"],
+  pt: ["Não pode escolher-se", "Já protegido", "Já encharcado", "Não é lobo", "Membro da alcateia", "Já silenciado", "Imune", "Não selecionável", "Protegido", "Abrir micro", "Fechar micro", "Micro ativo — fale", "Micro negado ou indisponível", "Vista MJ", "Vista jogadores"],
+  de: ["Kein Selbstziel", "Bereits geschützt", "Bereits übergossen", "Kein Wolf", "Rudelmitglied", "Bereits stumm", "Immun", "Nicht wählbar", "Geschützt", "Mikro öffnen", "Mikro schließen", "Mikro aktiv — sprich", "Mikro verweigert oder nicht verfügbar", "SL-Ansicht", "Spieleransicht"],
+  ru: ["Нельзя выбрать себя", "Уже защищён", "Уже облит", "Не волк", "Член стаи", "Уже лишён речи", "Неуязвим", "Недоступен для выбора", "Защищён", "Включить микрофон", "Выключить микрофон", "Микрофон включён — говорите", "Микрофон недоступен", "Вид ведущего", "Вид игроков"],
+  zh: ["不能选择自己", "已保护过", "已浇油", "非狼人", "狼群成员", "已禁言", "免疫", "不可选择", "受保护", "打开麦克风", "关闭麦克风", "麦克风已开启 — 请讲话", "麦克风被拒绝或不可用", "主持人视图", "玩家视图"],
 };
 export type NightPickerKey = typeof keys[number];
 export const NIGHT_PICKER_LOCALES = Object.fromEntries(Object.entries(rows).map(([lang, values]) => [lang, Object.fromEntries(keys.map((key, i) => [key, values[i]]))])) as Record<keyof typeof rows, Record<NightPickerKey, string>>;
