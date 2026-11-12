@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyJailor, applyRaven, buildNightSteps, createGame, preVoteActor } from "./engine";
+import { applyJailor, applyRaven, buildNightSteps, createGame, preVoteActor, startNight } from "./engine";
 
 function game(n: number) {
   const roles = ["corbeau", "geolier", "loup-garou", ...Array(n - 3).fill("villageois")];
@@ -33,5 +33,15 @@ describe("Raven & Jailor before vote", () => {
   it("jailor removes target's vote", () => {
     const s = { ...game(8), day: 2 };
     expect(applyJailor(s, s.players[3].id).players[3].canVote).toBe(false);
+  });
+  it("frozen Raven or Jailor skip their turn the next day, and recover next night", () => {
+    const s = { ...game(12), day: 2, night: 2 };
+    s.players[0].frozenNight = 2;
+    s.players[1].frozenNight = 2;
+    expect(preVoteActor(s, "corbeau")).toBeUndefined();
+    expect(preVoteActor(s, "geolier")).toBeUndefined();
+    const next = { ...startNight(s), day: 3 };
+    expect(preVoteActor(next, "corbeau")).toBeDefined();
+    expect(preVoteActor(next, "geolier")).toBeDefined();
   });
 });
