@@ -36,7 +36,6 @@ import { ROLE_BY_ID, ROLES, roleImage } from "@/data/roles";
 import { NarratorCard } from "@/components/NarratorCard";
 import { PhaseTransition } from "@/components/PhaseTransition";
 import { SpeakButton } from "@/components/SpeakButton";
-import { MicButton } from "@/components/MicButton";
 import { DebateSetupModal, DebateWheel, VoteSetupModal } from "@/components/DebateWheel";
 import { VoteWheel } from "@/components/VoteWheel";
 import type { RotationDirection } from "@/components/SeatingWheel";
@@ -111,7 +110,6 @@ function GamePage() {
     null,
   );
   const [debateDoneDay, setDebateDoneDay] = useState(0);
-  const [gmView, setGmView] = useState(false);
   const [preVoteOpen, setPreVoteOpen] = useState(false);
   const [direction, setDirection] = useState<RotationDirection>("clockwise");
   const [voteDirection, setVoteDirection] = useState<RotationDirection>("clockwise");
@@ -207,8 +205,7 @@ function GamePage() {
       clearBgm();
       return;
     }
-    if (state.phase.startsWith("NUIT")) startBgm("NIGHT");
-    else clearBgm();
+    startBgm(state.phase.startsWith("NUIT") ? "NIGHT" : "DAY");
   }, [state?.phase]);
 
   useEffect(() => () => clearBgm(), []);
@@ -274,13 +271,6 @@ function GamePage() {
     !isNight && state.phase === "JOUR_VOTE" && voteSetupDay !== state.day && overlayFree;
   const phaseLabel = isNight ? t("nightN", { n: state.night }) : t("dayN", { n: state.day });
 
-  const debateActive =
-    state.phase === "AUBE" &&
-    directionDay === state.day &&
-    !needsNightReport &&
-    !needsSuccession &&
-    debateDoneDay !== state.day;
-  const cleanView = debateActive && !gmView;
   const mutedPlayers = state.players.filter((p) => p.alive && p.mutedForDay);
   const fuelPlayers = state.players.filter((p) => p.alive && p.doused);
   const aliveCount = state.players.filter((p) => p.alive).length;
@@ -299,16 +289,7 @@ function GamePage() {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          {debateActive && (
-            <button
-              onClick={() => setGmView((v) => !v)}
-              aria-pressed={gmView}
-              className="rounded-full border border-border px-2.5 py-1.5 text-xs font-semibold text-muted-foreground transition active:scale-95"
-            >
-              {gmView ? t("gmViewHide") : t("gmViewShow")}
-            </button>
-          )}
-          {!cleanView && canUndo && (
+          {canUndo && (
             <button
               onClick={undo}
               aria-label={t("undoLabel")}
@@ -319,7 +300,7 @@ function GamePage() {
               <span>{t("undoLabel")}</span>
             </button>
           )}
-          {!isNight && !cleanView && (
+          {!isNight && (
             <button
               onClick={() => setSuicideOpen(true)}
               aria-label={t("gmSuicide")}
@@ -362,7 +343,7 @@ function GamePage() {
               {t("gmStatusMuted", { names: mutedPlayers.map((p) => p.name).join(", ") })}
             </span>
           )}
-          {!cleanView && fuelPlayers.length > 0 && (
+          {fuelPlayers.length > 0 && (
             <span className="rounded-full border border-destructive/40 bg-destructive/10 px-2.5 py-1 font-semibold text-destructive">
               🔥 {t("fuelStatus")}: {fuelPlayers.map((p) => p.name).join(", ")}
             </span>
@@ -490,7 +471,6 @@ function GamePage() {
           onUndo={undo}
           canUndo={canUndo}
           onProceedToVote={() => setVoteAnnounce(true)}
-          hideSecrets={cleanView}
         />
       ) : state.phase === "JOUR_VOTE" ? (
         voteSetupDay === state.day ? (
@@ -520,7 +500,6 @@ function GamePage() {
       ) : null}
 
       {/* Bloc de notes privées pour le Meneur */}
-      {!cleanView && (
       <section className="surface-card rounded-2xl p-4">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xs font-bold tracking-widest text-primary uppercase">
@@ -542,9 +521,8 @@ function GamePage() {
           />
         )}
       </section>
-      )}
 
-      {!cleanView && !(isNight && currentStep(state)) && (
+      {!(isNight && currentStep(state)) && (
         <section className="surface-card rounded-2xl p-4">
           <h2 className="mb-2 text-xs font-bold tracking-widest text-primary uppercase">
             {t("village", { n: state.players.filter((p) => p.alive).length })}
@@ -1049,7 +1027,6 @@ function NightPanel({
         <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
         <p className="absolute bottom-3 left-4 text-lg font-black text-primary">{stepTitle}</p>
         <div className="absolute right-3 bottom-3 flex items-center gap-2">
-          <MicButton />
           <SpeakButton text={isPackCall ? wolfCall : stepTitle} />
         </div>
       </div>
@@ -1963,9 +1940,7 @@ function DawnPanel({
   onUndo,
   canUndo,
   onProceedToVote,
-  hideSecrets,
 }: {
-  hideSecrets?: boolean;
   state: GameState;
   settings: GameSettings | null;
   direction: RotationDirection;
@@ -2022,7 +1997,7 @@ function DawnPanel({
               )}
             </div>
           )}
-          {!hideSecrets && (() => {
+          {(() => {
             const fox = state.players.find((p) => p.alive && effectiveRoleId(p) === "renard");
             const confidant = fox?.confidantId
               ? state.players.find((p) => p.id === fox.confidantId && p.alive)
