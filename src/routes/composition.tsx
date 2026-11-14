@@ -5,6 +5,7 @@ import { RoleCard } from "@/components/RoleCard";
 import { clearGame, loadGameMaster, loadNames, saveSetup } from "@/lib/session";
 import { TopBar } from "@/components/TopBar";
 import { useI18n } from "@/lib/i18n";
+import { autoComposition } from "@/game/auto-composition";
 
 const TITLE = "Composition du village — Nightfall Oracle";
 const DESC = "Choisis les rôles en jeu, puis laisse l'oracle distribuer les cartes.";
@@ -88,6 +89,15 @@ function CompositionPage() {
       <p className="mt-1 text-sm text-muted-foreground">
         {t("compositionCount", { r: total, p: names.length })}
       </p>
+      <button
+        type="button"
+        onClick={() => setCounts(autoComposition(names.length))}
+        disabled={names.length < 3}
+        className="mt-3 rounded-full border border-primary px-4 py-2 text-sm font-bold text-primary disabled:opacity-40"
+      >
+        ✨ Auto-équilibrer
+      </button>
+      <p className="mt-1 text-xs text-muted-foreground">Le MJ peut ensuite ajuster chaque rôle avec + / −.</p>
       {gm && (
         <p className="mt-1 mb-6 text-xs font-bold text-primary">
           {t("gmExcluded", { n: names.length })}
