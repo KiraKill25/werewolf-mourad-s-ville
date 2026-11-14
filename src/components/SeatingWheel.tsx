@@ -32,6 +32,7 @@ export function SeatingWheel({
 }) {
   const { t } = useI18n();
   const n = players.length || 1;
+  const capIndex = captainId ? players.findIndex((p) => p.id === captainId) : -1;
 
   return (
     <div className="relative mx-auto box-border aspect-square w-full max-w-[26rem] overflow-hidden">
@@ -63,7 +64,8 @@ export function SeatingWheel({
 
       {/* Nœuds joueurs */}
       {players.map((p, i) => {
-        const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+        const offset = capIndex >= 0 ? (i - capIndex + n) % n : i;
+        const angle = (offset / n) * 2 * Math.PI - Math.PI / 2;
         const r = 44;
         const x = 50 + r * Math.cos(angle);
         const y = 50 + r * Math.sin(angle);
