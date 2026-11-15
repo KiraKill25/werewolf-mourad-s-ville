@@ -40,6 +40,7 @@ import { DebateSetupModal, DebateWheel, VoteSetupModal } from "@/components/Deba
 import { VoteWheel } from "@/components/VoteWheel";
 import type { RotationDirection } from "@/components/SeatingWheel";
 import { EliminationReveal } from "@/components/EliminationReveal";
+import { GmRosterDrawer } from "@/components/GmRosterDrawer";
 import { GameRecapCard, type VoteRecord } from "@/components/GameRecapCard";
 import { useI18n } from "@/lib/i18n";
 import { useNarrate } from "@/hooks/use-narrate";
@@ -122,6 +123,7 @@ function GamePage() {
   const [suicideOpen, setSuicideOpen] = useState(false);
   const [guideModalOpen, setGuideModalOpen] = useState(false);
   const [gmNotesOpen, setGmNotesOpen] = useState(false);
+  const [rosterOpen, setRosterOpen] = useState(false);
   const [gmNotesText, setGmNotesText] = useState("");
   const [voteAnnounce, setVoteAnnounce] = useState(false);
   const lastPhase = useRef<string>("");
@@ -212,6 +214,7 @@ function GamePage() {
 
   // Retour Android : ferme d'abord la fenêtre ouverte, sinon annule la dernière étape.
   useBackHandler(() => {
+    if (rosterOpen) return setRosterOpen(false), true;
     if (guideModalOpen) return setGuideModalOpen(false), true;
     if (suicideOpen) return setSuicideOpen(false), true;
     if (preVoteOpen) return setPreVoteOpen(false), true;
@@ -277,6 +280,9 @@ function GamePage() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-lg space-y-5 box-border overflow-x-hidden overflow-y-auto px-4 py-6 pb-16">
+      {rosterOpen && (
+        <GmRosterDrawer state={state} onClose={() => setRosterOpen(false)} onChange={updateState} />
+      )}
       <header className="sticky top-0 z-40 -mx-4 flex items-center justify-between gap-2 bg-background/80 px-4 py-2 backdrop-blur">
         <div className="flex items-center gap-2">
           {isNight ? (
@@ -311,6 +317,14 @@ function GamePage() {
               <span className="hidden sm:inline">{t("gmSuicide")}</span>
             </button>
           )}
+          <button
+            onClick={() => setRosterOpen(true)}
+            aria-label="Vue du MJ"
+            title="Vue du MJ"
+            className="rounded-full border border-border px-2.5 py-1.5 text-xs transition active:scale-95"
+          >
+            👁️
+          </button>
           <button
             onClick={() => setGuideModalOpen(true)}
             aria-label={t("guideButton")}

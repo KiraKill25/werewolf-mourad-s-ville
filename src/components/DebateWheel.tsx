@@ -488,6 +488,20 @@ export function DebateWheel({
           {i + 1 < queue.length ? t("nextSpeaker") : t("endDebate")}
         </button>
       </div>
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        <button
+          onClick={() => setLeft((v) => (Number.isFinite(v) ? Math.max(0, v) + 30 : 30))}
+          className="rounded-full border border-primary/60 py-2.5 text-sm font-bold text-primary"
+        >
+          +30s
+        </button>
+        <button
+          onClick={onFinish}
+          className="rounded-full border border-gold/60 py-2.5 text-sm font-bold text-gold"
+        >
+          ⚖️ Passer au vote
+        </button>
+      </div>
     </NarratorCard>
   );
 }
