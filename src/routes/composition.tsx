@@ -6,6 +6,7 @@ import { clearGame, loadGameMaster, loadNames, saveSetup } from "@/lib/session";
 import { TopBar } from "@/components/TopBar";
 import { useI18n } from "@/lib/i18n";
 import { autoComposition } from "@/game/auto-composition";
+import { presetComposition, type PresetTheme } from "@/game/composition-presets";
 
 const TITLE = "Composition du village — Nightfall Oracle";
 const DESC = "Choisis les rôles en jeu, puis laisse l'oracle distribuer les cartes.";
@@ -97,6 +98,23 @@ function CompositionPage() {
       >
         ✨ Auto-équilibrer
       </button>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {([
+          ["classic", "🏛️ Classique"],
+          ["bluff", "🎭 Bluff & Stratégie"],
+          ["chaos", "🌪️ Chaos"],
+        ] as [PresetTheme, string][]).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            disabled={names.length < 3}
+            onClick={() => setCounts(presetComposition(names.length, id))}
+            className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold disabled:opacity-40"
+          >
+            {label}
+          </button>
+        ))}
+      </div>
       <p className="mt-1 text-xs text-muted-foreground">Le MJ peut ensuite ajuster chaque rôle avec + / −.</p>
       {gm && (
         <p className="mt-1 mb-6 text-xs font-bold text-primary">

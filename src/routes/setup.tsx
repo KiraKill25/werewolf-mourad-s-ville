@@ -11,6 +11,7 @@ import {
 } from "react";
 import { X } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { SquadBar } from "@/components/SquadBar";
 import {
   DEFAULT_SETTINGS,
   loadNames,
@@ -241,6 +242,13 @@ function SetupPage() {
       </header>
       <h1 className="neon-text mt-3 mb-6 text-2xl font-black">{t("setupTitle")}</h1>
 
+      <SquadBar
+        getNames={() => players.map((p) => (draftRef.current[p.id] ?? p.name).trim()).filter(Boolean)}
+        onLoad={(list) => {
+          draftRef.current = {};
+          setPlayers(list.map((name) => ({ id: newId(), name })));
+        }}
+      />
       <div className="space-y-3">
         {players.map((p, i) => (
           <PlayerRow

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ROLE_BY_ID, roleImage } from "@/data/roles";
 import { TopBar } from "@/components/TopBar";
 import { useI18n } from "@/lib/i18n";
@@ -172,12 +172,7 @@ function DistributionPage() {
           <p className="text-sm text-muted-foreground">
             {t("passPhoneTo", { name: player!.name })}
           </p>
-          <button
-            onClick={handleReveal}
-            className="neon-ring w-full rounded-full bg-primary py-4 font-bold text-primary-foreground"
-          >
-            {t("discoverRole")}
-          </button>
+          <HoldToReveal label={t("discoverRole")} onReveal={handleReveal} />
         </div>
       ) : (
         /* ── 5-second cinematic role reveal card ───────────────── */
@@ -245,5 +240,46 @@ function DistributionPage() {
         </div>
       )}
     </main>
+  );
+}
+
+/** Privacy shield: the role only appears after holding the button ~0.8s. */
+function HoldToReveal({ label, onReveal }: { label: string; onReveal: () => void }) {
+  const [p, setP] = useState(0);
+  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const stop = () => {
+    if (timer.current) clearInterval(timer.current);
+    timer.current = null;
+    setP(0);
+  };
+  const start = () => {
+    stop();
+    const t0 = Date.now();
+    timer.current = setInterval(() => {
+      const v = Math.min(1, (Date.now() - t0) / 800);
+      setP(v);
+      if (v >= 1) {
+        stop();
+        onReveal();
+      }
+    }, 30);
+  };
+  useEffect(() => stop, []);
+  return (
+    <div className="space-y-2">
+      <button
+        type="button"
+        onPointerDown={start}
+        onPointerUp={stop}
+        onPointerLeave={stop}
+        onPointerCancel={stop}
+        onContextMenu={(e) => e.preventDefault()}
+        className="neon-ring relative w-full touch-manipulation select-none overflow-hidden rounded-full bg-primary/30 py-4 font-bold text-primary-foreground"
+      >
+        <span className="absolute inset-y-0 left-0 bg-primary" style={{ width: `${p * 100}%` }} />
+        <span className="relative">🔒 {label}</span>
+      </button>
+      <p className="text-xs text-muted-foreground">Maintiens appuyé pour révéler</p>
+    </div>
   );
 }
