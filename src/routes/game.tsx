@@ -800,8 +800,8 @@ function PlayerPicker({
             key={p.id}
             disabled={off}
             onClick={() => onToggle(p.id)}
-            className={`relative block h-auto min-h-24 w-full whitespace-normal rounded-lg border px-3 py-3 text-sm transition duration-300 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 ${
-              selected.includes(p.id) && !off ? PICKER_ACCENT[accent] : "border-border"
+            className={`relative block h-auto min-h-24 w-full whitespace-normal rounded-2xl border px-3 py-3 text-sm backdrop-blur transition duration-300 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 ${
+              selected.includes(p.id) && !off ? `${PICKER_ACCENT[accent]} scale-[1.02]` : "cyber-card hover:border-primary"
             }`}
           >
             {p.isCaptain && (
@@ -1159,7 +1159,7 @@ function NightPanel({
               <select
                 value={guessRole}
                 onChange={(e) => setGuessRole(e.target.value)}
-                className="w-full rounded-xl border border-border bg-input px-3 py-3 text-sm text-foreground"
+                className="cyber-input w-full rounded-xl px-3 py-3 text-sm"
               >
                 <option value="">—</option>
                 {ROLES.map((r) => (

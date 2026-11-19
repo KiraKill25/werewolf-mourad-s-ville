@@ -107,8 +107,8 @@ const PlayerRow = memo(function PlayerRow({
   const [value, setValue] = useState(initialName);
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+    <div className="cyber-card flex items-center gap-3 rounded-2xl p-2">
+      <span className="neon-ring grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary to-accent text-sm font-bold text-primary-foreground">
         {index + 1}
       </span>
       <input
@@ -121,13 +121,13 @@ const PlayerRow = memo(function PlayerRow({
         onChange={(e) => setValue(e.target.value)}
         onBlur={() => onCommit(id, value)}
         placeholder={placeholder}
-        className="w-full rounded-full bg-input px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+        className="cyber-input w-full rounded-full px-4 py-3 text-sm"
       />
       <button
         type="button"
         aria-label={removeLabel}
         onClick={() => onRemove(id)}
-        className="grid size-9 shrink-0 place-items-center rounded-full border border-border text-muted-foreground"
+        className="grid size-9 shrink-0 place-items-center rounded-full border border-destructive/60 bg-destructive/10 text-destructive"
       >
         <X className="size-4" />
       </button>
@@ -267,12 +267,12 @@ function SetupPage() {
       <button
         type="button"
         onClick={addPlayer}
-        className="mt-4 w-full rounded-full border border-dashed border-border py-3 text-sm text-muted-foreground"
+        className="cyber-pill mt-4 w-full rounded-full border-dashed py-3 text-sm font-bold text-primary"
       >
         {t("addPlayer")}
       </button>
 
-      <section className="mt-6 space-y-4 rounded-3xl border border-border bg-card p-4">
+      <section className="cyber-card mt-6 space-y-4 rounded-3xl p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="text-sm font-bold">{t("debateTimer")}</h2>
@@ -340,7 +340,7 @@ function SetupPage() {
                 setCustomTime(String(safe));
                 setSettings((s) => ({ ...s, debateTimePerPlayer: safe }));
               }}
-              className="w-20 rounded-full bg-input px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-primary"
+              className="cyber-input w-20 rounded-full px-3 py-2 text-xs"
             />
           </div>
           <p className="text-xs text-muted-foreground">
